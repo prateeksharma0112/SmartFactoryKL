@@ -1,7 +1,11 @@
-from fastapi import FastAPI
+import asyncio
+from typing import List
+from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
-from basyx.aas import list_submodels
-app = FastAPI(title="SFD Backend")
+from ws_endpoints.dashboard_ws import dashboard_endpoint
+from services.dashboard_service import build_dashboard
+
+app = FastAPI(title="WEB GUI for AAS - Backend")
 
 app.add_middleware(
     CORSMiddleware,
@@ -14,6 +18,13 @@ app.add_middleware(
 def health():
     return {"status": "backend running"}
 
-@app.get("/submodels")
-def get_submodels():
-    return list_submodels()
+
+@app.get("/dashboard")
+async def get_dashboard():
+    """HTTP endpoint for dashboard snapshot (appears in /docs)"""
+    return build_dashboard()
+
+# WebSocket endpoint
+@app.websocket("/ws/dashboard")
+async def dashboard_ws(websocket: WebSocket):
+    await dashboard_endpoint(websocket)
