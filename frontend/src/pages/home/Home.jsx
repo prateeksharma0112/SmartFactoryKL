@@ -1,19 +1,37 @@
-import { useEffect, useState } from "react";
-import { fetchSubmodels } from "../../api/backend";
+import React, { useEffect, useState } from "react";
+import FactoryInfoSection from "../../components/home/FactoryInfoSection";
+import OrdersOverviewSection from "../../components/home/OrdersOverviewSection";
 
-export default function Home() {
-  const [submodels, setSubmodels] = useState([]);
 
-useEffect(() => {
-  fetchSubmodels().then(setSubmodels);
-}, []);
+const Home = () => {
+  const [data, setData] = useState({
+    factory: { name: "", country: "", uniqueId: "", islandsCount: 0 },
+    orders: { total: 0, planned: 0, running: 0, finished: 0 },
+  });
+
+  useEffect(() => {
+    let ws = new WebSocket("ws://localhost:8000/ws/dashboard");
+
+    ws.onopen = () => console.log("Connected!");
+    ws.onmessage = (event) => {
+      const dashboardData = JSON.parse(event.data);
+      setData(dashboardData);
+    };
+    ws.onerror = (err) => console.error("WebSocket error:", err);
+
+    return () => {
+      if (ws.readyState === WebSocket.OPEN) ws.close();
+    };
+  }, []);
+
+  const { factory, orders } = data;
 
   return (
-    <div style={{ padding: 40 }}>
-      <h1>Welcome to the SFD Project</h1>
-
-      <p>Congratulations on setting up the SFD GUI project!</p>
-      
+    <div className="homepage-container">
+      <FactoryInfoSection factory={data.factory} />
+      <OrdersOverviewSection orders={data.orders} />
     </div>
   );
-}
+};
+
+export default Home;
