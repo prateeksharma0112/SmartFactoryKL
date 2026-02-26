@@ -1,4 +1,4 @@
-/* GLOBAL RESET */
+/* GLOBAL RESET - Refined to be safer */
 *,
 *::before,
 *::after {
@@ -7,7 +7,12 @@
   box-sizing: border-box;
 }
 
-/* BODY */
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #f1f5f9; /* Light grey background for the whole app */
+  color: #1e293b;
+  line-height: 1.5;
+}
 
 /* NAVBAR */
 nav {
@@ -15,115 +20,101 @@ nav {
   top: 0;
   left: 0;
   width: 100%;
-  height: 60px;
-  background-color: #1E3A8A;
-  color: #fff;
+  height: 64px;
+  background-color: #1e3a8a;
+  color: #ffffff;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 1rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  z-index: 1000;
-  flex-wrap: wrap;
+  padding: 0 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  z-index: 100; /* Lowered slightly to allow tooltips to work better */
 }
 
 nav .logo {
-  font-weight: bold;
-  font-size: 1.2rem;
+  font-weight: 800;
+  font-size: 1.25rem;
+  letter-spacing: -0.025em;
 }
 
 nav .links {
   display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
+  gap: 1.5rem;
 }
 
 nav .links a {
-  color: #fff;
+  color: #e2e8f0;
   text-decoration: none;
   font-weight: 500;
+  transition: color 0.2s;
 }
 
 nav .links a:hover {
-  text-decoration: underline;
+  color: #ffffff;
 }
 
-/* MAIN CONTENT */
+/* MAIN CONTENT WRAPPER */
 .main-content {
-  padding-top: 70px; /* space for navbar */
-  max-width: 1200px;
+  padding-top: 84px; /* Space for fixed nav + some breathing room */
+  max-width: 1400px; /* Increased to give the Gantt chart more width */
   margin: 0 auto;
-  padding-left: 1rem;
-  padding-right: 1rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  padding-bottom: 3rem;
 }
 
-.homepage-container {
-  padding: 1rem;
-  margin-top: 70px; /* space for navbar */
-}
-
-.section {
-  margin-bottom: 2rem;
-}
-
+/* SECTION HEADINGS */
 .section-heading {
-  text-align: center;
-  font-size: 1.5rem;
-  margin-bottom: 2rem;
-  color: #1E3A8A;
+  text-align: left; /* Modern dashboards usually align headings left */
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #0f172a;
 }
 
-/* Row of cards */
+/* DASHBOARD CARDS */
 .cards-row {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
-  justify-content: center; /* center cards horizontally */
+  margin-bottom: 2.5rem;
 }
 
-/* Single card */
 .card {
   background-color: #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-  border-radius: 8px;
-  padding: 1rem 1.5rem;
-  min-width: 180px;
-  max-width: 220px;
-  flex: 1 1 180px;
-  text-align: center;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  padding: 1.25rem;
+  text-align: left;
 }
 
 .card h3 {
-  font-size: 1rem;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   margin-bottom: 0.5rem;
-  color: #1E3A8A;
+  color: #64748b;
 }
 
 .card p {
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e3a8a;
 }
 
-
-/* RESPONSIVE BREAKPOINTS */
+/* RESPONSIVE */
 @media (max-width: 768px) {
-  .dashboard-grid {
-    grid-template-columns: 1fr; /* stack tiles on small screens */
-  }
   nav {
-    flex-direction: column;
-    align-items: flex-start;
-    height: auto;
-    padding: 0.5rem 1rem;
+    padding: 0 1rem;
   }
-  nav .links {
-    margin-top: 0.5rem;
+  
+  .main-content {
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
-  @media (max-width: 768px) {
-  .cards-row {
-    flex-direction: column;
-    align-items: center;
+  
+  .section-heading {
+    font-size: 1.5rem;
   }
-}
 }

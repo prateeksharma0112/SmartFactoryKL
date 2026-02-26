@@ -1,4 +1,3 @@
-# app/websockets/dashboard_ws.py
 from fastapi import WebSocket
 from .manager import WebSocketManager
 from services.dashboard_service import build_dashboard

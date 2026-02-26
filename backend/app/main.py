@@ -4,6 +4,7 @@ from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from ws_endpoints.dashboard_ws import dashboard_endpoint
 from services.dashboard_service import build_dashboard
+from ws_endpoints.productionPlan_ws import productionPlan_endpoint
 
 app = FastAPI(title="WEB GUI for AAS - Backend")
 
@@ -28,3 +29,7 @@ async def get_dashboard():
 @app.websocket("/ws/dashboard")
 async def dashboard_ws(websocket: WebSocket):
     await dashboard_endpoint(websocket)
+
+@app.websocket("/ws/production_plan")
+async def productionPlan(websocket: WebSocket):
+    await productionPlan_endpoint(websocket)
