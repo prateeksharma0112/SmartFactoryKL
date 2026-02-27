@@ -199,6 +199,15 @@ export default function GanttChart({ productionPlan }) {
           </div>
           <div className="tooltip-body">
             <div className="tooltip-time-row">
+              <span className="tooltip-label">START DATE</span>
+              <strong className="tooltip-value">{new Date(hoveredOp.start).toLocaleDateString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+              })}</strong>
+            </div>
+            <div className="tooltip-time-row">
               <span className="tooltip-label">START TIME</span>
               <strong className="tooltip-value">{getFullTimeLabel(hoveredOp.renderX)}</strong>
             </div>
@@ -224,6 +233,17 @@ export default function GanttChart({ productionPlan }) {
             <div className="tooltip-time-row">
               <span className="tooltip-label">CURRENT TIME (HH:MM:SS)</span>
               <strong className="tooltip-value" style={{ color: '#ef4444' }}>{getLivePrecisionTime()}</strong>
+            </div>
+            <div className="tooltip-time-row">
+              <span className="tooltip-label">CURRENT DATE</span>
+              <strong className="tooltip-value" style={{ color: '#ef4444' }}>
+                {new Date(productionPlan.currentTime || now).toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                })}
+              </strong>
             </div>
           </div>
         </div>
