@@ -309,7 +309,7 @@
 /* The container that handles the centering logic */
 .gantt-unit-indicator-container {
   position: absolute;
-  left: 50%;
+  left: 53%;
   top: 12px; /* Adjust this to match your header text height */
   transform: translateX(-50%);
   z-index: 5;
