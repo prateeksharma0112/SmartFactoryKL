@@ -100,7 +100,14 @@ export default function GanttChart({ productionPlan }) {
   if (processedMachines.length === 0) return <div className="no-data">Initializing Schedule...</div>;
 
   return (
-    <div className="gantt-root">
+    <div className="gantt-root" style={{ position: 'relative' }} >
+      {/* FIXED CENTERED INDICATOR - Anchored to gantt-root */}
+      <div className="gantt-unit-indicator-container">
+        <span className="gantt-unit-pill">
+          Production Time (HH:mm)
+        </span>
+      </div>
+
       {/* Wrap everything in a flex container */}
       <div style={{ display: 'flex' }}>
 
@@ -120,7 +127,6 @@ export default function GanttChart({ productionPlan }) {
 
         {/* 2. SCROLLABLE COLUMN: Timeline (X-Axis) */}
         <div className="gantt-scroll-container" style={{ flexGrow: 1, overflowX: 'auto' }}>
-
           {/* Header with Timeline Axis */}
           <div className="gantt-header">
             <div className="timeline-axis" style={{ width: maxTimeMins * pixelsPerMin }}>
@@ -130,6 +136,7 @@ export default function GanttChart({ productionPlan }) {
                   <div key={mins} className="time-tick major" style={{ left: mins * pixelsPerMin }}>
                     <span className="time-text">{getClockLabel(mins)}</span>
                   </div>
+
                 );
               })}
             </div>

@@ -12,6 +12,7 @@
   background: var(--primary-bg);
   margin: 20px;
   position: relative;
+  padding: 10px;
 }
 
 .gantt-scroll-container {
@@ -47,13 +48,13 @@
   letter-spacing: 0.05em;
   position: sticky;
   left: 0;
-  height: 70px;
+  height: 80px;
   /* z-index: 110; */
 }
 
 .timeline-axis {
   position: relative;
-  height: 70px;
+  height: 80px;
   padding-right: 50px; /* Space at the end of the chart */
   margin-left: 20px;
 }
@@ -303,4 +304,29 @@
   font-size: 10px;
   padding: 0 5px;
   background: var(--secondary-bg);
+}
+
+/* The container that handles the centering logic */
+.gantt-unit-indicator-container {
+  position: absolute;
+  left: 50%;
+  top: 12px; /* Adjust this to match your header text height */
+  transform: translateX(-50%);
+  z-index: 150; /* Higher than machines (110) but below tooltips */
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* The actual pill label styling */
+.gantt-unit-pill {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background-color: var(--secondary-bg);
+  padding: 6px 16px;  
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
