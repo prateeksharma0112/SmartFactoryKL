@@ -138,7 +138,8 @@ def normalize_time_to_minutes(plan: dict) -> dict:
     min_time = min(all_times)
 
     def to_minutes(dt: datetime) -> int:
-        return int((dt - min_time).total_seconds() / 60)
+        # Using round() prevents the 1-minute offset caused by truncation
+        return int(round((dt - min_time).total_seconds() / 60))
 
     # Process orders
     for order in plan["orders"]:
