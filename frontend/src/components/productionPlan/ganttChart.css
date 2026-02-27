@@ -312,7 +312,7 @@
   left: 50%;
   top: 12px; /* Adjust this to match your header text height */
   transform: translateX(-50%);
-  z-index: 150; /* Higher than machines (110) but below tooltips */
+  z-index: 5;
   pointer-events: none;
   white-space: nowrap;
 }
