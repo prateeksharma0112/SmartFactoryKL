@@ -1,7 +1,5 @@
 import base64
 import requests
-from datetime import datetime
-from dateutil import parser
 
 # Utility function to get machine idShort from AssignedResourceRef URL
 def get_machine_id(resource_url: str) -> str:
@@ -114,49 +112,3 @@ def extract_production_plan(production_orders_submodel: dict) -> dict:
             for machine, ops in machines.items()
         ]
     }
-
-
-
-def parse_iso_to_datetime(iso_str: str):
-    return parser.isoparse(iso_str)
-
-
-def normalize_time_to_minutes(plan: dict) -> dict:
-    """
-    Convert all start/end times to minutes from earliest start.
-    Keeps original timestamps.
-    """
-    all_times = []
-
-    # Collect all start/end datetimes
-    for order in plan["orders"]:
-        for op in order["operations"]:
-            all_times.append(parse_iso_to_datetime(op["start"]))
-            all_times.append(parse_iso_to_datetime(op["end"]))
-
-    # Find earliest start
-    min_time = min(all_times)
-
-    def to_minutes(dt: datetime) -> int:
-        # Using round() prevents the 1-minute offset caused by truncation
-        return int(round((dt - min_time).total_seconds() / 60))
-
-    # Process orders
-    for order in plan["orders"]:
-        for op in order["operations"]:
-            start_dt = parse_iso_to_datetime(op["start"])
-            end_dt = parse_iso_to_datetime(op["end"])
-            op["start_min"] = to_minutes(start_dt)
-            op["end_min"] = to_minutes(end_dt)
-            op["duration_min"] = op["end_min"] - op["start_min"]
-
-    # Process machines
-    for machine in plan["machines"]:
-        for op in machine["operations"]:
-            start_dt = parse_iso_to_datetime(op["start"])
-            end_dt = parse_iso_to_datetime(op["end"])
-            op["start_min"] = to_minutes(start_dt)
-            op["end_min"] = to_minutes(end_dt)
-            op["duration_min"] = op["end_min"] - op["start_min"]
-
-    return plan
