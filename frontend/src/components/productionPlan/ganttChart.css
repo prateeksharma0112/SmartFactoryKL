@@ -26,13 +26,13 @@
   display: flex;
   background: var(--secondary-bg);
   border-bottom: 2px solid var(--border-color);
-  padding-top: 30px; /* Space for clock labels */
   position: sticky;
   top: 0;
   /* z-index: 100; */
 }
 
 .machine-column-header {
+  padding-top: 30px;
   width: 140px;
   min-width: 140px;
   background: var(--secondary-bg);
@@ -47,12 +47,13 @@
   letter-spacing: 0.05em;
   position: sticky;
   left: 0;
-  z-index: 110;
+  height: 70px;
+  /* z-index: 110; */
 }
 
 .timeline-axis {
   position: relative;
-  height: 40px;
+  height: 70px;
   padding-right: 50px; /* Space at the end of the chart */
   margin-left: 20px;
 }
@@ -202,7 +203,7 @@
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 10;
+  /* z-index: 10; */
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -213,7 +214,7 @@
   filter: brightness(1.1);
   transform: translateY(-2px);
   box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
-  z-index: 95;
+  /* z-index: 95; */
 }
 
 .op-finished {
@@ -233,7 +234,7 @@
   border-radius: 10px;
   padding: 14px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  z-index: 9999;
+  /* z-index: 9999; */
   pointer-events: none;
   min-width: 200px;
   backdrop-filter: blur(4px);
@@ -303,7 +304,3 @@
   padding: 0 5px;
   background: var(--secondary-bg);
 }
-
-
-
-

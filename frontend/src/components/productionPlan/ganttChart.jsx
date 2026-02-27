@@ -4,7 +4,7 @@ import "./ganttChart.css";
 export default function GanttChart({ productionPlan }) {
   const [hoveredOp, setHoveredOp] = useState(null);
   const [hoveredNow, setHoveredNow] = useState(null); // New state for NOW hover
-  const [now, setNow] = useState(Date.now()); 
+  const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 10000);
@@ -94,72 +94,93 @@ export default function GanttChart({ productionPlan }) {
 
   // Helper for high-precision validation tooltip
   const getLivePrecisionTime = () => {
-    return new Date().toLocaleTimeString('en-GB', { hour12: false }); 
+    return new Date().toLocaleTimeString('en-GB', { hour12: false });
   };
 
   if (processedMachines.length === 0) return <div className="no-data">Initializing Schedule...</div>;
 
   return (
     <div className="gantt-root">
-      <div className="gantt-scroll-container">
-        <div className="gantt-header">
+      {/* Wrap everything in a flex container */}
+      <div style={{ display: 'flex' }}>
+
+        {/* 1. FIXED COLUMN: Machines (Y-Axis) */}
+        <div className="machine-sidebar-fixed" >
           <div className="machine-column-header">Machines</div>
-          <div className="timeline-axis" style={{ width: maxTimeMins * pixelsPerMin }}>
-            {Array.from({ length: Math.ceil(maxTimeMins / 5) + 1 }).map((_, i) => {
-              const mins = i * 5;
-              return (
-                <div key={mins} className="time-tick major" style={{ left: mins * pixelsPerMin }}>
-                  <span className="time-text">{getClockLabel(mins)}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="gantt-body-relative">
-          {/* SINGLE NOW LINE OVERLAY - Fixed "Ladder" and alignment */}
-          <div className="gantt-now-overlay" style={{ left: 140, width: maxTimeMins * pixelsPerMin }}>
-            <div className="now-line" style={{ left: nowLineX }}>
-              <div 
-                className="now-tag"
-                onMouseEnter={(e) => setHoveredNow({ x: e.clientX, y: e.clientY })}
-                onMouseLeave={() => setHoveredNow(null)}
-              >
-                NOW
-              </div>
-            </div>
-          </div>
-
           {processedMachines.map((machine) => (
-            <div key={machine.machineId} className="machine-row" style={{ height: rowHeight }}>
-              <div className="machine-label">{machine.machineId}</div>
-              <div className="ops-container" style={{ width: maxTimeMins * pixelsPerMin, backgroundSize: `${pixelsPerMin}px 100%` }}>
-                {machine.operations.map((op) => {
-                  const jobId = op.operationId.split("_")[1];
-                  const isRelatedJob = hoveredOp && hoveredOp.operationId.split("_")[1] === jobId;
-                  const isFinished = (op.renderX + op.renderW) * pixelsPerMin < nowLineX;
-
-                  return (
-                    <div
-                      key={op.operationId}
-                      className={`op-bar ${hoveredOp && !isRelatedJob ? 'is-faded' : ''} ${isRelatedJob ? 'is-highlighted' : ''} ${isFinished ? 'op-finished' : ''}`}
-                      style={{
-                        left: op.renderX * pixelsPerMin,
-                        width: Math.max(op.renderW * pixelsPerMin - 4, 5),
-                        backgroundColor: jobColors[jobId],
-                      }}
-                      onMouseEnter={(e) => setHoveredOp({ ...op, x: e.clientX, y: e.clientY })}
-                      onMouseLeave={() => setHoveredOp(null)}
-                    >
-                      <div className="op-content">
-                        <span className="op-id-label">{op.operationId}</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+            <div
+              key={machine.machineId}
+              className="machine-label"
+              style={{ height: rowHeight }}
+            >
+              {machine.machineId}
             </div>
           ))}
+        </div>
+
+        {/* 2. SCROLLABLE COLUMN: Timeline (X-Axis) */}
+        <div className="gantt-scroll-container" style={{ flexGrow: 1, overflowX: 'auto' }}>
+
+          {/* Header with Timeline Axis */}
+          <div className="gantt-header">
+            <div className="timeline-axis" style={{ width: maxTimeMins * pixelsPerMin }}>
+              {Array.from({ length: Math.ceil(maxTimeMins / 5) + 1 }).map((_, i) => {
+                const mins = i * 5;
+                return (
+                  <div key={mins} className="time-tick major" style={{ left: mins * pixelsPerMin }}>
+                    <span className="time-text">{getClockLabel(mins)}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Body with NOW line and Operations */}
+          <div className="gantt-body-relative" style={{ width: maxTimeMins * pixelsPerMin }}>
+
+            {/* NOW LINE OVERLAY - Positioned relative to the timeline start */}
+            <div className="gantt-now-overlay" style={{ width: maxTimeMins * pixelsPerMin }}>
+              <div className="now-line" style={{ left: nowLineX }}>
+                <div
+                  className="now-tag"
+                  onMouseEnter={(e) => setHoveredNow({ x: e.clientX, y: e.clientY })}
+                  onMouseLeave={() => setHoveredNow(null)}
+                >
+                  NOW
+                </div>
+              </div>
+            </div>
+
+            {processedMachines.map((machine) => (
+              <div key={machine.machineId} className="machine-row" style={{ height: rowHeight }}>
+                <div className="ops-container" style={{ width: maxTimeMins * pixelsPerMin, backgroundSize: `${pixelsPerMin}px 100%` }}>
+                  {machine.operations.map((op) => {
+                    const jobId = op.operationId.split("_")[1];
+                    const isRelatedJob = hoveredOp && hoveredOp.operationId.split("_")[1] === jobId;
+                    const isFinished = (op.renderX + op.renderW) * pixelsPerMin < nowLineX;
+
+                    return (
+                      <div
+                        key={op.operationId}
+                        className={`op-bar ${hoveredOp && !isRelatedJob ? 'is-faded' : ''} ${isRelatedJob ? 'is-highlighted' : ''} ${isFinished ? 'op-finished' : ''}`}
+                        style={{
+                          left: op.renderX * pixelsPerMin,
+                          width: Math.max(op.renderW * pixelsPerMin - 4, 5),
+                          backgroundColor: jobColors[jobId],
+                        }}
+                        onMouseEnter={(e) => setHoveredOp({ ...op, x: e.clientX, y: e.clientY })}
+                        onMouseLeave={() => setHoveredOp(null)}
+                      >
+                        <div className="op-content">
+                          <span className="op-id-label">{op.operationId}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
