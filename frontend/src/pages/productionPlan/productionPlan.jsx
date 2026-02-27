@@ -4,10 +4,10 @@ import GanttChart from "../../components/productionPlan/ganttChart";
 const ProductionPlan = () => {
   const [productionPlan, setProductionPlan] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
-  
+
   // Keep the date updated (refreshes every minute)
   useEffect(() => {
-    const timer = setInterval(() => setCurrentDate(new Date()), 60000);
+    const timer = setInterval(() => setCurrentDate(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
@@ -37,6 +37,14 @@ const ProductionPlan = () => {
     year: 'numeric'
   });
 
+  // Format time: e.g., "18:58:39"
+  const formattedTime = currentDate.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
+
   return (
     <div className="homepage-container">
       {/* INTUITIVE HEADER */}
@@ -55,12 +63,12 @@ const ProductionPlan = () => {
               Production Schedule
             </h2>
             {/* NEW DATE DISPLAY */}
-            <span style={{ 
-              color: '#94a3b8', 
-              fontSize: '0.9rem', 
+            <span style={{
+              color: '#94a3b8',
+              fontSize: '0.9rem',
               fontWeight: '500',
               borderLeft: '2px solid #e2e8f0',
-              paddingLeft: '12px' 
+              paddingLeft: '12px'
             }}>
               {formattedDate}
             </span>
@@ -70,7 +78,7 @@ const ProductionPlan = () => {
           </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'grid', alignItems: 'center', gap: '12px' }}>
           {/* Status Pill */}
           <div style={{
             display: 'flex',
@@ -94,6 +102,26 @@ const ProductionPlan = () => {
               boxShadow: productionPlan ? '0 0 8px #22c55e' : 'none'
             }} />
             {productionPlan ? 'LIVE SYSTEM' : 'CONNECTING...'}
+          </div>
+          {/* Time with HRS label */}
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+            <span style={{
+              fontFamily: 'JetBrains Mono, Menlo, monospace',
+              fontSize: '1.2rem',
+              fontWeight: '800',
+              color: '#1e293b',
+              letterSpacing: '-0.02em'
+            }}>
+              {formattedTime}
+            </span>
+            <span style={{
+              fontSize: '0.7rem',
+              fontWeight: '700',
+              color: '#94a3b8',
+              letterSpacing: '0.05em'
+            }}>
+              HRS
+            </span>
           </div>
         </div>
       </div>
