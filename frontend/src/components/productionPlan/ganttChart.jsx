@@ -44,7 +44,10 @@ export default function GanttChart({ productionPlan }) {
         const opEnd = new Date(op.end);
         const startOffset = (opStart.getTime() - snappedStartBase.getTime()) / 60000;
         const endOffset = (opEnd.getTime() - snappedStartBase.getTime()) / 60000;
-        return { ...op, renderX: startOffset, renderW: endOffset - startOffset };
+
+        const diffMins = (opEnd.getTime() - opStart.getTime()) / 60000;
+
+        return { ...op, renderX: startOffset, renderW: endOffset - startOffset, duration_min: diffMins };
       })
     }));
   }, [machines, snappedStartBase]);
