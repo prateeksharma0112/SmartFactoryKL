@@ -148,6 +148,7 @@
   bottom: 0;
   pointer-events: none; /* Allows interacting with bars underneath the line */
   z-index: 100;
+  margin-left: 20px; /* Aligns with the ops container */
 }
 
 .now-validation-tooltip {
