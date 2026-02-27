@@ -3,6 +3,13 @@ import GanttChart from "../../components/productionPlan/ganttChart";
 
 const ProductionPlan = () => {
   const [productionPlan, setProductionPlan] = useState(null);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  
+  // Keep the date updated (refreshes every minute)
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentDate(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:8000/ws/production_plan");
@@ -11,11 +18,7 @@ const ProductionPlan = () => {
 
     ws.onmessage = (event) => {
       const rawData = JSON.parse(event.data);
-
-      // Use the spread operator {...} to create a brand NEW object 
-      // This tells React: "Ignore what you think you know, this is new data."
       setProductionPlan({ ...rawData.ProductionPlan });
-
       console.log("UI Update Triggered");
     };
 
@@ -25,6 +28,14 @@ const ProductionPlan = () => {
       if (ws.readyState === WebSocket.OPEN) ws.close();
     };
   }, []);
+
+  // Format date nicely: e.g., "Thursday, Feb 26, 2026"
+  const formattedDate = currentDate.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
 
   return (
     <div className="homepage-container">
@@ -39,9 +50,21 @@ const ProductionPlan = () => {
         paddingBottom: '12px'
       }}>
         <div>
-          <h2 style={{ margin: 0, color: '#0f172a', fontSize: '1.6rem', fontWeight: '800' }}>
-            Production Schedule
-          </h2>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+            <h2 style={{ margin: 0, color: '#0f172a', fontSize: '1.6rem', fontWeight: '800' }}>
+              Production Schedule
+            </h2>
+            {/* NEW DATE DISPLAY */}
+            <span style={{ 
+              color: '#94a3b8', 
+              fontSize: '0.9rem', 
+              fontWeight: '500',
+              borderLeft: '2px solid #e2e8f0',
+              paddingLeft: '12px' 
+            }}>
+              {formattedDate}
+            </span>
+          </div>
           <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '0.9rem' }}>
             Real-time machine allocation and job sequence
           </p>
@@ -55,7 +78,6 @@ const ProductionPlan = () => {
             gap: '6px',
             padding: '6px 12px',
             borderRadius: '9999px',
-            // Use optional chaining or simple null check
             backgroundColor: productionPlan ? '#f0fdf4' : '#fef2f2',
             border: `1px solid ${productionPlan ? '#bbf7d0' : '#fecaca'}`,
             color: productionPlan ? '#166534' : '#991b1b',
@@ -76,12 +98,24 @@ const ProductionPlan = () => {
         </div>
       </div>
 
-      {/* Only render chart if data is present, otherwise show a loader */}
       {productionPlan ? (
         <GanttChart productionPlan={productionPlan} />
       ) : (
         <div style={{ textAlign: 'center', padding: '50px', color: '#64748b' }}>
-          Loading production data...
+          {/* Creative Loader */}
+          <div className="loader-dots">Loading Production Plan ...</div>
+          <style>{`
+            .loader-dots:after {
+              content: '.';
+              animation: dots 1.5s steps(5, end) infinite;
+            }
+            @keyframes dots {
+              0%, 20% { content: '.'; }
+              40% { content: '..'; }
+              60% { content: '...'; }
+              80%, 100% { content: ''; }
+            }
+          `}</style>
         </div>
       )}
     </div>

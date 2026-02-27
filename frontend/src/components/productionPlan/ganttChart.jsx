@@ -1,30 +1,73 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import "./ganttChart.css";
 
 export default function GanttChart({ productionPlan }) {
   const [hoveredOp, setHoveredOp] = useState(null);
+  const [hoveredNow, setHoveredNow] = useState(null); // New state for NOW hover
+  const [now, setNow] = useState(Date.now()); 
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 10000);
+    return () => clearInterval(timer);
+  }, []);
 
   const pixelsPerMin = 30;
   const rowHeight = 90;
 
-  const sortedMachines = useMemo(() => {
+  const machines = useMemo(() => {
     if (!productionPlan?.machines) return [];
     return [...productionPlan.machines].sort((a, b) => {
-      return a.machineId.localeCompare(b.machineId, undefined, {
-        numeric: true,
-        sensitivity: 'base'
-      });
+      return a.machineId.localeCompare(b.machineId, undefined, { numeric: true, sensitivity: 'base' });
     });
   }, [productionPlan]);
 
-  const allOps = sortedMachines.flatMap((m) => m.operations || []);
-  const maxTime = useMemo(() => Math.max(...allOps.map((op) => op.end_min), 0) + 5, [allOps]);
+  const snappedStartBase = useMemo(() => {
+    const allOps = machines.flatMap(m => m.operations || []);
+    if (allOps.length === 0) return null;
+
+    const firstOp = allOps.reduce((earliest, current) =>
+      new Date(current.start) < new Date(earliest.start) ? current : earliest
+      , allOps[0]);
+
+    const actualStart = new Date(firstOp.start);
+    const snapped = new Date(actualStart);
+    snapped.setUTCMinutes(Math.floor(actualStart.getUTCMinutes() / 5) * 5, 0, 0);
+    return snapped;
+  }, [machines]);
+
+  const processedMachines = useMemo(() => {
+    if (!snappedStartBase) return [];
+    return machines.map(machine => ({
+      ...machine,
+      operations: (machine.operations || []).map(op => {
+        const opStart = new Date(op.start);
+        const opEnd = new Date(op.end);
+        const startOffset = (opStart.getTime() - snappedStartBase.getTime()) / 60000;
+        const endOffset = (opEnd.getTime() - snappedStartBase.getTime()) / 60000;
+        return { ...op, renderX: startOffset, renderW: endOffset - startOffset };
+      })
+    }));
+  }, [machines, snappedStartBase]);
+
+  const maxTimeMins = useMemo(() => {
+    const allOps = processedMachines.flatMap(m => m.operations);
+    return allOps.length > 0 ? Math.max(...allOps.map(op => op.renderX + op.renderW)) + 10 : 60;
+  }, [processedMachines]);
+
+  const nowLineX = useMemo(() => {
+    if (!snappedStartBase) return -1000;
+    const localNow = new Date();
+    const shiftedNow = Date.now() - (localNow.getTimezoneOffset() * 60000);
+    const startUTC = snappedStartBase.getTime();
+    const diffMins = (shiftedNow - startUTC) / 60000;
+    return diffMins * pixelsPerMin;
+  }, [now, snappedStartBase, pixelsPerMin]);
 
   const jobColors = useMemo(() => {
     const palette = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"];
     const mapping = {};
     let colorIndex = 0;
-    allOps.forEach(op => {
+    processedMachines.flatMap(m => m.operations).forEach(op => {
       const jobId = op.operationId.split("_")[1];
       if (jobId && !mapping[jobId]) {
         mapping[jobId] = palette[colorIndex % palette.length];
@@ -32,76 +75,125 @@ export default function GanttChart({ productionPlan }) {
       }
     });
     return mapping;
-  }, [allOps]);
+  }, [processedMachines]);
 
-  if (sortedMachines.length === 0) return <div className="no-data">No data available</div>;
+  const getClockLabel = (mins) => {
+    if (!snappedStartBase) return "";
+    const date = new Date(snappedStartBase.getTime() + mins * 60000);
+    return `${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}`;
+  };
+
+  const getFullTimeLabel = (mins) => {
+    if (!snappedStartBase) return "";
+    const date = new Date(snappedStartBase.getTime() + mins * 60000);
+    return `${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}:${String(date.getUTCSeconds()).padStart(2, '0')}`;
+  };
+
+  // Helper for high-precision validation tooltip
+  const getLivePrecisionTime = () => {
+    return new Date().toLocaleTimeString('en-GB', { hour12: false }); 
+  };
+
+  if (processedMachines.length === 0) return <div className="no-data">Initializing Schedule...</div>;
 
   return (
     <div className="gantt-root">
       <div className="gantt-scroll-container">
         <div className="gantt-header">
           <div className="machine-column-header">Machines</div>
-          <div className="timeline-axis">
-            {Array.from({ length: maxTime + 1 }).map((_, i) => (
-              <div key={i} className={`time-tick ${i % 5 === 0 ? "major" : ""}`} style={{ width: pixelsPerMin }}>
-                {i % 5 === 0 && <span className="time-text">{i}m</span>}
-              </div>
-            ))}
+          <div className="timeline-axis" style={{ width: maxTimeMins * pixelsPerMin }}>
+            {Array.from({ length: Math.ceil(maxTimeMins / 5) + 1 }).map((_, i) => {
+              const mins = i * 5;
+              return (
+                <div key={mins} className="time-tick major" style={{ left: mins * pixelsPerMin }}>
+                  <span className="time-text">{getClockLabel(mins)}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {sortedMachines.map((machine) => (
-          <div key={machine.machineId} className="machine-row" style={{ height: rowHeight }}>
-            <div className="machine-label">{machine.machineId}</div>
-            <div
-              className="ops-container"
-              style={{
-                width: maxTime * pixelsPerMin,
-                backgroundSize: `${pixelsPerMin}px 100%`
-              }}
-            >
-              {(machine.operations || []).map((op) => {
-                const jobId = op.operationId.split("_")[1];
-                const startX = op.start_min * pixelsPerMin;
-                const width = (op.end_min - op.start_min) * pixelsPerMin;
-                const isRelatedJob = hoveredOp && hoveredOp.operationId.split("_")[1] === jobId;
-
-                return (
-                  <div
-                    key={op.operationId}
-                    className={`op-bar ${hoveredOp && !isRelatedJob ? 'is-faded' : ''} ${isRelatedJob ? 'is-highlighted' : ''}`}
-                    style={{
-                      left: startX,
-                      width: Math.max(width - 4, 5),
-                      backgroundColor: jobColors[jobId],
-                    }}
-                    onMouseEnter={(e) => setHoveredOp({ ...op, x: e.clientX, y: e.clientY })}
-                    onMouseLeave={() => setHoveredOp(null)}
-                  >
-                    <div className="op-content">
-                      {/* Removed op-time-label from here */}
-                      <span className="op-id-label">{op.operationId}</span>
-                    </div>
-                  </div>
-                );
-              })}
+        <div className="gantt-body-relative">
+          {/* SINGLE NOW LINE OVERLAY - Fixed "Ladder" and alignment */}
+          <div className="gantt-now-overlay" style={{ left: 140, width: maxTimeMins * pixelsPerMin }}>
+            <div className="now-line" style={{ left: nowLineX }}>
+              <div 
+                className="now-tag"
+                onMouseEnter={(e) => setHoveredNow({ x: e.clientX, y: e.clientY })}
+                onMouseLeave={() => setHoveredNow(null)}
+              >
+                NOW
+              </div>
             </div>
           </div>
-        ))}
+
+          {processedMachines.map((machine) => (
+            <div key={machine.machineId} className="machine-row" style={{ height: rowHeight }}>
+              <div className="machine-label">{machine.machineId}</div>
+              <div className="ops-container" style={{ width: maxTimeMins * pixelsPerMin, backgroundSize: `${pixelsPerMin}px 100%` }}>
+                {machine.operations.map((op) => {
+                  const jobId = op.operationId.split("_")[1];
+                  const isRelatedJob = hoveredOp && hoveredOp.operationId.split("_")[1] === jobId;
+                  const isFinished = (op.renderX + op.renderW) * pixelsPerMin < nowLineX;
+
+                  return (
+                    <div
+                      key={op.operationId}
+                      className={`op-bar ${hoveredOp && !isRelatedJob ? 'is-faded' : ''} ${isRelatedJob ? 'is-highlighted' : ''} ${isFinished ? 'op-finished' : ''}`}
+                      style={{
+                        left: op.renderX * pixelsPerMin,
+                        width: Math.max(op.renderW * pixelsPerMin - 4, 5),
+                        backgroundColor: jobColors[jobId],
+                      }}
+                      onMouseEnter={(e) => setHoveredOp({ ...op, x: e.clientX, y: e.clientY })}
+                      onMouseLeave={() => setHoveredOp(null)}
+                    >
+                      <div className="op-content">
+                        <span className="op-id-label">{op.operationId}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
+      {/* JOB TOOLTIP */}
       {hoveredOp && (
-        <div
-          className="gantt-tooltip"
-          style={{ left: hoveredOp.x + 15, top: hoveredOp.y - 10 }}
-        >
+        <div className="gantt-tooltip" style={{ left: hoveredOp.x + 15, top: hoveredOp.y - 10 }}>
           <div className="tooltip-header" style={{ borderLeftColor: jobColors[hoveredOp.operationId.split("_")[1]] }}>
-            <strong>{hoveredOp.operationId}</strong>
+            <strong className="tooltip-title">{hoveredOp.operationId}</strong>
           </div>
           <div className="tooltip-body">
-            <p><span>Start:</span> {hoveredOp.start_min} min</p>
-            <p><span>End:</span> {hoveredOp.end_min} min</p>
-            <p><span>Duration:</span> {hoveredOp.duration_min} min</p>
+            <div className="tooltip-time-row">
+              <span className="tooltip-label">START TIME</span>
+              <strong className="tooltip-value">{getFullTimeLabel(hoveredOp.renderX)}</strong>
+            </div>
+            <div className="tooltip-time-row">
+              <span className="tooltip-label">END TIME</span>
+              <strong className="tooltip-value">{getFullTimeLabel(hoveredOp.renderX + hoveredOp.renderW)}</strong>
+            </div>
+            <div className="tooltip-divider">
+              <span className="tooltip-label">DURATION: </span>
+              <span className="tooltip-duration">{hoveredOp.duration_min} min</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* NOW LINE VALIDATION TOOLTIP */}
+      {hoveredNow && (
+        <div className="gantt-tooltip now-validation-tooltip" style={{ left: hoveredNow.x + 15, top: hoveredNow.y - 10 }}>
+          <div className="tooltip-header" style={{ borderLeftColor: '#ef4444' }}>
+            <strong className="tooltip-title">Live Status</strong>
+          </div>
+          <div className="tooltip-body">
+            <div className="tooltip-time-row">
+              <span className="tooltip-label">CURRENT TIME (HH:MM:SS)</span>
+              <strong className="tooltip-value" style={{ color: '#ef4444' }}>{getLivePrecisionTime()}</strong>
+            </div>
           </div>
         </div>
       )}
