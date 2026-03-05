@@ -1,4 +1,4 @@
-# 2026-10-Development of a GUI for Monitoring a Production Planning System Using AAS
+# 2026-10-Development of a GUI for an AAS-Based Production Planning System
 
 
 
