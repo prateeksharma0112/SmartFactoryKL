@@ -1,23 +1,32 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import "./ganttChart.css";
 
+/**
+ * GanttChart Component
+ * Renders a production schedule with real-time tracking, auto-scrolling, 
+ * and interactive tooltips for machine operations.
+ */
 export default function GanttChart({ productionPlan, isFollowMode }) {
+  // --- STATE & REFS ---
   const [hoveredOp, setHoveredOp] = useState(null);
   const [hoveredNow, setHoveredNow] = useState(null);
   const [now, setNow] = useState(Date.now());
   const scrollContainerRef = useRef(null);
 
-  // 1. TIMERS
+  // --- CONFIGURATION CONSTANTS ---
+  const pixelsPerMin = 30; // Horizontal scale
+  const rowHeight = 90;    // Vertical machine row height
+
+  // --- 1. LIFECYCLE / TIMERS ---
   useEffect(() => {
+    // Update the "Now" line position every 10 seconds
     const timer = setInterval(() => setNow(Date.now()), 10000);
     return () => clearInterval(timer);
   }, []);
 
-  // 2. CONSTANTS
-  const pixelsPerMin = 30;
-  const rowHeight = 90;
+  // --- 2. DATA ORCHESTRATION (useMemo) ---
 
-  // 3. DATA CALCULATIONS (Must come before the scroll useEffect)
+  // Sort machines alphanumerically (e.g., M1, M2, M10)
   const machines = useMemo(() => {
     if (!productionPlan?.machines) return [];
     return [...productionPlan.machines].sort((a, b) => {
@@ -25,6 +34,7 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
     });
   }, [productionPlan]);
 
+  // Determine the global start time of the chart, snapped to the nearest 5-minute block
   const snappedStartBase = useMemo(() => {
     const allOps = machines.flatMap(m => m.operations || []);
     if (allOps.length === 0) return null;
@@ -39,6 +49,7 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
     return snapped;
   }, [machines]);
 
+  // Transform raw machine/operation data into renderable coordinates
   const processedMachines = useMemo(() => {
     if (!snappedStartBase) return [];
     return machines.map(machine => ({
@@ -63,11 +74,13 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
     }));
   }, [machines, snappedStartBase]);
 
+  // Calculate total chart width based on the furthest operation
   const maxTimeMins = useMemo(() => {
     const allOps = processedMachines.flatMap(m => m.operations);
     return allOps.length > 0 ? Math.max(...allOps.map(op => op.renderX + op.renderW)) + 10 : 60;
   }, [processedMachines]);
 
+  // Calculate the horizontal pixel position for the "Now" line
   const nowLineX = useMemo(() => {
     if (!snappedStartBase) return -1000;
     const localNow = new Date();
@@ -77,6 +90,7 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
     return diffMins * pixelsPerMin;
   }, [now, snappedStartBase, pixelsPerMin]);
 
+  // Assign consistent colors to jobs based on their Job ID
   const jobColors = useMemo(() => {
     const palette = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"];
     const mapping = {};
@@ -91,7 +105,9 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
     return mapping;
   }, [processedMachines]);
 
-  // 4. AUTO-SCROLL EFFECT (Now safe because nowLineX is defined above)
+  // --- 3. INTERACTION LOGIC ---
+
+  // Handle Follow Mode: Keep the "Now" line centered in the viewport
   useEffect(() => {
     if (isFollowMode && scrollContainerRef.current && typeof nowLineX === 'number' && nowLineX > -1000) {
       const container = scrollContainerRef.current;
@@ -107,7 +123,7 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
     }
   }, [nowLineX, isFollowMode]);
 
-  // 5. HELPERS
+  // --- 4. FORMATTING HELPERS ---
   const getClockLabel = (mins) => {
     if (!snappedStartBase) return "";
     const date = new Date(snappedStartBase.getTime() + mins * 60000);
@@ -124,15 +140,20 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
     return new Date().toLocaleTimeString('en-GB', { hour12: false });
   };
 
-  if (processedMachines.length === 0) return <div className="no-data">Initializing Schedule...</div>;
+  // --- 5. RENDER ---
+  if (processedMachines.length === 0) {
+    return <div className="no-data">Initializing Schedule...</div>;
+  }
 
   return (
     <div className="gantt-root" style={{ position: 'relative' }} >
+      {/* Unit Header */}
       <div className="gantt-unit-indicator-container">
         <span className="gantt-unit-pill">Production Time (HH:mm)</span>
       </div>
 
       <div style={{ display: 'flex' }}>
+        {/* Sticky Left Sidebar: Machines */}
         <div className="machine-sidebar-fixed" >
           <div className="machine-column-header">Machines</div>
           {processedMachines.map((machine) => (
@@ -142,11 +163,13 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
           ))}
         </div>
 
+        {/* Scrollable Area: Timeline and Operations */}
         <div
           className="gantt-scroll-container"
           ref={scrollContainerRef}
           style={{ flexGrow: 1, overflowX: 'auto' }}
         >
+          {/* Time Axis Header */}
           <div className="gantt-header">
             <div className="timeline-axis" style={{ width: maxTimeMins * pixelsPerMin }}>
               {Array.from({ length: Math.ceil(maxTimeMins / 5) + 1 }).map((_, i) => {
@@ -160,7 +183,10 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
             </div>
           </div>
 
+          {/* Main Body: Operations Grid */}
           <div className="gantt-body-relative" style={{ width: maxTimeMins * pixelsPerMin }}>
+            
+            {/* Real-time Indicator Overlay */}
             <div className="gantt-now-overlay" style={{ width: maxTimeMins * pixelsPerMin }}>
               <div className="now-line" style={{ left: nowLineX }}>
                 <div
@@ -173,6 +199,7 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
               </div>
             </div>
 
+            {/* Render Rows of Operations per Machine */}
             {processedMachines.map((machine) => (
               <div key={machine.machineId} className="machine-row" style={{ height: rowHeight }}>
                 <div className="ops-container" style={{ width: maxTimeMins * pixelsPerMin, backgroundSize: `${pixelsPerMin}px 100%` }}>
@@ -180,7 +207,7 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
                     const jobId = op.operationId.split("_")[1];
                     const isFinished = (op.renderX + op.renderW) * pixelsPerMin < nowLineX;
                     const isRunning = nowLineX >= (op.renderX * pixelsPerMin) &&
-                      nowLineX <= (op.renderX + op.renderW) * pixelsPerMin;
+                                      nowLineX <= (op.renderX + op.renderW) * pixelsPerMin;
 
                     return (
                       <div
@@ -213,7 +240,9 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
         </div>
       </div>
 
-      {/* JOB TOOLTIP */}
+      {/* --- TOOLTIPS --- */}
+
+      {/* Operation Hover Details */}
       {hoveredOp && (
         <div className="gantt-tooltip" style={{ left: hoveredOp.x + 15, top: hoveredOp.y - 10 }}>
           <div className="tooltip-header" style={{
@@ -236,7 +265,7 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
         </div>
       )}
 
-      {/* NOW TOOLTIP */}
+      {/* "Now" Line Validation Details */}
       {hoveredNow && (
         <div className="gantt-tooltip now-validation-tooltip" style={{ left: hoveredNow.x + 15, top: hoveredNow.y - 10 }}>
           <div className="tooltip-header" style={{ borderLeftColor: '#ef4444' }}>
