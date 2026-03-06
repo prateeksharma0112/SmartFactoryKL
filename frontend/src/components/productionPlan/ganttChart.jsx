@@ -35,22 +35,29 @@ export default function GanttChart({ productionPlan }) {
     return snapped;
   }, [machines]);
 
-  const processedMachines = useMemo(() => {
-    if (!snappedStartBase) return [];
-    return machines.map(machine => ({
-      ...machine,
-      operations: (machine.operations || []).map(op => {
-        const opStart = new Date(op.start);
-        const opEnd = new Date(op.end);
-        const startOffset = (opStart.getTime() - snappedStartBase.getTime()) / 60000;
-        const endOffset = (opEnd.getTime() - snappedStartBase.getTime()) / 60000;
+const processedMachines = useMemo(() => {
+  if (!snappedStartBase) return [];
+  return machines.map(machine => ({
+    ...machine,
+    operations: (machine.operations || []).map(op => {
+      const opStart = new Date(op.start);
+      const opEnd = new Date(op.end);
+      const startOffset = (opStart.getTime() - snappedStartBase.getTime()) / 60000;
+      const endOffset = (opEnd.getTime() - snappedStartBase.getTime()) / 60000;
 
-        const diffMins = (opEnd.getTime() - opStart.getTime()) / 60000;
-
-        return { ...op, renderX: startOffset, renderW: endOffset - startOffset, duration_min: diffMins };
-      })
-    }));
-  }, [machines, snappedStartBase]);
+      return { 
+        ...op, 
+        machineId: machine.machineId, // Added machine context
+        orderId: op.orderId, // Added Order ID
+        status: op.status, // Added status
+        isFrozen: op.isFrozen, // Added frozen flag
+        renderX: startOffset, 
+        renderW: endOffset - startOffset, 
+        duration_min: (opEnd.getTime() - opStart.getTime()) / 60000 
+      };
+    })
+  }));
+}, [machines, snappedStartBase]);
 
   const maxTimeMins = useMemo(() => {
     const allOps = processedMachines.flatMap(m => m.operations);
@@ -194,10 +201,35 @@ export default function GanttChart({ productionPlan }) {
       {/* JOB TOOLTIP */}
       {hoveredOp && (
         <div className="gantt-tooltip" style={{ left: hoveredOp.x + 15, top: hoveredOp.y - 10 }}>
-          <div className="tooltip-header" style={{ borderLeftColor: jobColors[hoveredOp.operationId.split("_")[1]] }}>
+          <div className="tooltip-header" style={{
+            borderLeftColor: jobColors[hoveredOp.operationId.split("_")[1]],
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
             <strong className="tooltip-title">{hoveredOp.operationId}</strong>
+            {/* Frozen indicator in the header */}
+            {hoveredOp.isFrozen && <span title="Frozen" style={{ fontSize: '14px' }}>❄️</span>}
           </div>
+
           <div className="tooltip-body">
+            {/* ADDED: Order ID & Machine */}
+            <div className="tooltip-time-row">
+              <span className="tooltip-label">ORDER ID</span>
+              <strong className="tooltip-value">{hoveredOp.orderId}</strong>
+            </div>
+            <div className="tooltip-time-row">
+              <span className="tooltip-label">MACHINE</span>
+              <strong className="tooltip-value">{hoveredOp.machineId}</strong>
+            </div>
+            <div className="tooltip-time-row">
+              <span className="tooltip-label">STATUS</span>
+              <strong className="tooltip-value" style={{ textTransform: 'uppercase' }}>{hoveredOp.status}</strong>
+            </div>
+
+            <div className="tooltip-divider" style={{ margin: '8px 0', borderTop: '1px solid #e2e8f0' }}></div>
+
+            {/* KEPT: Original formatting for Dates and Times */}
             <div className="tooltip-time-row">
               <span className="tooltip-label">START DATE</span>
               <strong className="tooltip-value">{new Date(hoveredOp.start).toLocaleDateString('en-US', {
@@ -217,7 +249,7 @@ export default function GanttChart({ productionPlan }) {
             </div>
             <div className="tooltip-divider">
               <span className="tooltip-label">DURATION: </span>
-              <span className="tooltip-duration">{hoveredOp.duration_min} min</span>
+              <span className="tooltip-duration">{Math.round(hoveredOp.duration_min)} min</span>
             </div>
           </div>
         </div>

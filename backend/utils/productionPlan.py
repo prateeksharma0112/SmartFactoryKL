@@ -15,100 +15,64 @@ def get_machine_id(resource_url: str) -> str:
 
 def extract_production_plan(production_orders_submodel: dict) -> dict:
     machines = {}
-    orders_output = []
+    
+    # Get the main Orders list
+    orders = next((elem.get("value", []) for elem in production_orders_submodel.get("submodelElements", []) 
+                   if elem.get("idShort") == "Orders"), [])
 
-    # Step 1: Find Orders list
-    orders = []
-    for elem in production_orders_submodel.get("submodelElements", []):
-        if elem.get("idShort") == "Orders" and elem.get("value"):
-            orders = elem["value"]
-            break
-
-    # Step 2: Iterate Orders
     for order in orders:
-        order_id = None
-        operations_output = []
+        order_id = "Unknown"
+        operations_list = []
 
-        operations = []
-
-        # Extract OrderID and Operations
+        # Find OrderID and the Operations list inside the Order
         for subelem in order.get("value", []):
             if subelem.get("idShort") == "OrderInfo":
-                for prop in subelem.get("value", []):
-                    if prop.get("idShort") == "OrderID":
-                        order_id = prop.get("value")
-
+                order_id = next((p.get("value") for p in subelem.get("value", []) 
+                                if p.get("idShort") == "OrderID"), "Unknown")
             if subelem.get("idShort") == "Operations":
-                operations = subelem.get("value", [])
+                operations_list = subelem.get("value", [])
 
-        # Step 3: Iterate Operations
-        for operation in operations:
-            operation_id = None
-            schedule = None
+        for op_smc in operations_list:
+            op_values = op_smc.get("value", [])
+            
+            # Reset variables for each operation
+            op_id, op_status, is_frozen = None, "Unknown", False
+            machine_url, start, end = None, None, None
 
-            for op_elem in operation.get("value", []):
-                if op_elem.get("idShort") == "OperationID":
-                    operation_id = op_elem.get("value")
+            # Traverse the Operation SMC
+            for prop in op_values:
+                pid = prop.get("idShort")
+                if pid == "OperationID":
+                    op_id = prop.get("value")
+                elif pid == "IsFrozen":
+                    is_frozen = str(prop.get("value")).lower() == "true"
+                elif pid == "OperationStatus":
+                    op_status = prop.get("value")
+                elif pid == "Schedule":
+                    # Look inside Schedule for Resource and Times
+                    for s_prop in prop.get("value", []):
+                        sid = s_prop.get("idShort")
+                        if sid == "AssignedResourceRef":
+                            keys = s_prop.get("value", {}).get("keys", [])
+                            if keys: machine_url = keys[0].get("value")
+                        elif sid == "PlannedStartDateTime":
+                            start = s_prop.get("value")
+                        elif sid == "PlannedEndDateTime":
+                            end = s_prop.get("value")
 
-                if op_elem.get("idShort") == "Schedule":
-                    schedule = op_elem
-
-            if not schedule:
-                continue
-
-            machine_url = None
-            start_time = None
-            end_time = None
-
-            for sched_prop in schedule.get("value", []):
-                if sched_prop.get("idShort") == "AssignedResourceRef":
-                    keys = sched_prop.get("value", {}).get("keys", [])
-                    if keys:
-                        machine_url = keys[0].get("value")
-
-                if sched_prop.get("idShort") == "PlannedStartDateTime":
-                    start_time = sched_prop.get("value")
-
-                if sched_prop.get("idShort") == "PlannedEndDateTime":
-                    end_time = sched_prop.get("value")
-
-            if not machine_url or not start_time or not end_time:
-                continue
-
-            machine_no = get_machine_id(machine_url)
-
-            operation_data = {
-                "operationId": operation_id,
-                "machineId": machine_no,
-                "start": start_time,
-                "end": end_time
-            }
-
-            # Add to order-wise structure
-            operations_output.append(operation_data)
-
-            #  Add to machine-wise structure
-            if machine_no not in machines:
-                machines[machine_no] = []
-
-            machines[machine_no].append({
-                "orderId": order_id,
-                "operationId": operation_id,
-                "start": start_time,
-                "end": end_time
-            })
-
-        # After processing operations → append order
-        if order_id:
-            orders_output.append({
-                "orderId": order_id,
-                "operations": operations_output
-            })
+            if machine_url and start:
+                m_name = get_machine_id(machine_url)
+                if m_name not in machines: machines[m_name] = []
+                
+                machines[m_name].append({
+                    "orderId": order_id,
+                    "operationId": op_id,
+                    "start": start,
+                    "end": end,
+                    "status": op_status,
+                    "isFrozen": is_frozen
+                })
 
     return {
-        "orders": orders_output,
-        "machines": [
-            {"machineId": machine, "operations": ops}
-            for machine, ops in machines.items()
-        ]
+        "machines": [{"machineId": m, "operations": ops} for m, ops in machines.items()]
     }
