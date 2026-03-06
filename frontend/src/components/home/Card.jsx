@@ -1,5 +1,3 @@
-
-
 const Card = ({ title, value, description, icon }) => {
   return (
     <div className="card">

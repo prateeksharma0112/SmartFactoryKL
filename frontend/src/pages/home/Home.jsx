@@ -10,6 +10,20 @@ const Home = () => {
   });
 
   useEffect(() => {
+    // 1. Initial Fetch to prevent blank screen
+    const fetchInitialData = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/dashboard");
+        const result = await response.json();
+        setData(result);
+      } catch (err) {
+        console.error("Initial fetch failed:", err);
+      }
+    };
+
+    fetchInitialData();
+
+    // 2. WebSocket Connection
     let ws = new WebSocket("ws://localhost:8000/ws/dashboard");
 
     ws.onopen = () => console.log("Connected!");
