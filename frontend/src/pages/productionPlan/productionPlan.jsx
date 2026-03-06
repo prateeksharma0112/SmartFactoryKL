@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import GanttChart from "../../components/productionPlan/ganttChart";
+import ProductionHeader from "./productionHeader";
+import "./productionPlan.css";
 
 const ProductionPlan = () => {
   const [productionPlan, setProductionPlan] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [isFollowMode, setIsFollowMode] = useState(true); // Default to ON
-  // Keep the date updated (refreshes every minute)
+  const [isFollowMode, setIsFollowMode] = useState(true);
+
   useEffect(() => {
     const timer = setInterval(() => setCurrentDate(new Date()), 1000);
     return () => clearInterval(timer);
@@ -29,133 +31,38 @@ const ProductionPlan = () => {
     };
   }, []);
 
-  // Format date nicely: e.g., "Thursday, Feb 26, 2026"
-  const formattedDate = currentDate.toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
+  const formattedDate = currentDate.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+    year: "numeric"
   });
 
-  // Format time: e.g., "18:58:39"
-  const formattedTime = currentDate.toLocaleTimeString('en-GB', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
+  const formattedTime = currentDate.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
     hour12: false
   });
 
   return (
     <div className="homepage-container">
-      {/* INTUITIVE HEADER */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '24px',
-        padding: '0 4px',
-        borderBottom: '1px solid #e2e8f0',
-        paddingBottom: '12px'
-      }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
-            <h2 style={{ margin: 0, color: '#0f172a', fontSize: '1.6rem', fontWeight: '800' }}>
-              Production Schedule
-            </h2>
-            {/* NEW DATE DISPLAY */}
-            <span style={{
-              color: '#94a3b8',
-              fontSize: '0.9rem',
-              fontWeight: '500',
-              borderLeft: '2px solid #e2e8f0',
-              paddingLeft: '12px'
-            }}>
-              {formattedDate}
-            </span>
-          </div>
-          <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '0.9rem' }}>
-            Real-time machine allocation and job sequence
-          </p>
-        </div>
-        {/* NEW TOGGLE UI */}
-  <div className="switch-container">
-    <span className="switch-label">Follow Mode</span>
-    <label className="switch">
-      <input 
-        type="checkbox" 
-        checked={isFollowMode}
-        onChange={(e) => setIsFollowMode(e.target.checked)}
+      <ProductionHeader
+        formattedDate={formattedDate}
+        formattedTime={formattedTime}
+        productionPlan={productionPlan}
+        isFollowMode={isFollowMode}
+        setIsFollowMode={setIsFollowMode}
       />
-      <span className="slider"></span>
-    </label>
-  </div>
-
-        <div style={{ display: 'grid', alignItems: 'center', gap: '12px' }}>
-          {/* Status Pill */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '6px 12px',
-            borderRadius: '9999px',
-            backgroundColor: productionPlan ? '#f0fdf4' : '#fef2f2',
-            border: `1px solid ${productionPlan ? '#bbf7d0' : '#fecaca'}`,
-            color: productionPlan ? '#166534' : '#991b1b',
-            fontSize: '0.75rem',
-            fontWeight: '700',
-            letterSpacing: '0.05em'
-          }}>
-            <span style={{
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              backgroundColor: productionPlan ? '#22c55e' : '#ef4444',
-              display: 'inline-block',
-              boxShadow: productionPlan ? '0 0 8px #22c55e' : 'none'
-            }} />
-            {productionPlan ? 'LIVE SYSTEM' : 'CONNECTING...'}
-          </div>
-          {/* Time with HRS label */}
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-            <span style={{
-              fontFamily: 'JetBrains Mono, Menlo, monospace',
-              fontSize: '1.2rem',
-              fontWeight: '800',
-              color: '#1e293b',
-              letterSpacing: '-0.02em'
-            }}>
-              {formattedTime}
-            </span>
-            <span style={{
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              color: '#94a3b8',
-              letterSpacing: '0.05em'
-            }}>
-              HRS
-            </span>
-          </div>
-        </div>
-      </div>
 
       {productionPlan ? (
-        <GanttChart productionPlan={productionPlan} isFollowMode={isFollowMode} />
+        <GanttChart
+          productionPlan={productionPlan}
+          isFollowMode={isFollowMode}
+        />
       ) : (
-        <div style={{ textAlign: 'center', padding: '50px', color: '#64748b' }}>
-          {/* Creative Loader */}
+        <div className="loading-container">
           <div className="loader-dots">Loading Production Plan ...</div>
-          <style>{`
-            .loader-dots:after {
-              content: '.';
-              animation: dots 1.5s steps(5, end) infinite;
-            }
-            @keyframes dots {
-              0%, 20% { content: '.'; }
-              40% { content: '..'; }
-              60% { content: '...'; }
-              80%, 100% { content: ''; }
-            }
-          `}</style>
         </div>
       )}
     </div>
