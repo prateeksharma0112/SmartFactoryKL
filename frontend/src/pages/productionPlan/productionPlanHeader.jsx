@@ -1,4 +1,4 @@
-const ProductionHeader = ({
+const productionPlanHeader = ({
   formattedDate,
   formattedTime,
   productionPlan,
@@ -52,4 +52,4 @@ const ProductionHeader = ({
   );
 };
 
-export default ProductionHeader;
+export default productionPlanHeader;

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import GanttChart from "../../components/productionPlan/ganttChart";
-import ProductionHeader from "./productionHeader";
+import ProductionHeader from "./productionPlanHeader";
 import "./productionPlan.css";
 
 const ProductionPlan = () => {
