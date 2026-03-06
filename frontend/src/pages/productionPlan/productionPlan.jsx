@@ -4,7 +4,7 @@ import GanttChart from "../../components/productionPlan/ganttChart";
 const ProductionPlan = () => {
   const [productionPlan, setProductionPlan] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
-
+  const [isFollowMode, setIsFollowMode] = useState(true); // Default to ON
   // Keep the date updated (refreshes every minute)
   useEffect(() => {
     const timer = setInterval(() => setCurrentDate(new Date()), 1000);
@@ -77,6 +77,18 @@ const ProductionPlan = () => {
             Real-time machine allocation and job sequence
           </p>
         </div>
+        {/* NEW TOGGLE UI */}
+  <div className="switch-container">
+    <span className="switch-label">Follow Mode</span>
+    <label className="switch">
+      <input 
+        type="checkbox" 
+        checked={isFollowMode}
+        onChange={(e) => setIsFollowMode(e.target.checked)}
+      />
+      <span className="slider"></span>
+    </label>
+  </div>
 
         <div style={{ display: 'grid', alignItems: 'center', gap: '12px' }}>
           {/* Status Pill */}
@@ -127,7 +139,7 @@ const ProductionPlan = () => {
       </div>
 
       {productionPlan ? (
-        <GanttChart productionPlan={productionPlan} />
+        <GanttChart productionPlan={productionPlan} isFollowMode={isFollowMode} />
       ) : (
         <div style={{ textAlign: 'center', padding: '50px', color: '#64748b' }}>
           {/* Creative Loader */}

@@ -1,19 +1,23 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import "./ganttChart.css";
 
-export default function GanttChart({ productionPlan }) {
+export default function GanttChart({ productionPlan, isFollowMode }) {
   const [hoveredOp, setHoveredOp] = useState(null);
-  const [hoveredNow, setHoveredNow] = useState(null); // New state for NOW hover
+  const [hoveredNow, setHoveredNow] = useState(null);
   const [now, setNow] = useState(Date.now());
+  const scrollContainerRef = useRef(null);
 
+  // 1. TIMERS
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 10000);
     return () => clearInterval(timer);
   }, []);
 
+  // 2. CONSTANTS
   const pixelsPerMin = 30;
   const rowHeight = 90;
 
+  // 3. DATA CALCULATIONS (Must come before the scroll useEffect)
   const machines = useMemo(() => {
     if (!productionPlan?.machines) return [];
     return [...productionPlan.machines].sort((a, b) => {
@@ -47,10 +51,10 @@ export default function GanttChart({ productionPlan }) {
 
         return {
           ...op,
-          machineId: machine.machineId, // Added machine context
-          orderId: op.orderId, // Added Order ID
-          status: op.status, // Added status
-          isFrozen: op.isFrozen, // Added frozen flag
+          machineId: machine.machineId,
+          orderId: op.orderId,
+          status: op.status,
+          isFrozen: op.isFrozen,
           renderX: startOffset,
           renderW: endOffset - startOffset,
           duration_min: (opEnd.getTime() - opStart.getTime()) / 60000
@@ -87,6 +91,23 @@ export default function GanttChart({ productionPlan }) {
     return mapping;
   }, [processedMachines]);
 
+  // 4. AUTO-SCROLL EFFECT (Now safe because nowLineX is defined above)
+  useEffect(() => {
+    if (isFollowMode && scrollContainerRef.current && typeof nowLineX === 'number' && nowLineX > -1000) {
+      const container = scrollContainerRef.current;
+      const viewportWidth = container.offsetWidth;
+
+      if (viewportWidth > 0) {
+        const targetScroll = nowLineX - (viewportWidth / 2);
+        container.scrollTo({
+          left: targetScroll,
+          behavior: 'smooth'
+        });
+      }
+    }
+  }, [nowLineX, isFollowMode]);
+
+  // 5. HELPERS
   const getClockLabel = (mins) => {
     if (!snappedStartBase) return "";
     const date = new Date(snappedStartBase.getTime() + mins * 60000);
@@ -99,7 +120,6 @@ export default function GanttChart({ productionPlan }) {
     return `${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}:${String(date.getUTCSeconds()).padStart(2, '0')}`;
   };
 
-  // Helper for high-precision validation tooltip
   const getLivePrecisionTime = () => {
     return new Date().toLocaleTimeString('en-GB', { hour12: false });
   };
@@ -108,33 +128,25 @@ export default function GanttChart({ productionPlan }) {
 
   return (
     <div className="gantt-root" style={{ position: 'relative' }} >
-      {/* FIXED CENTERED INDICATOR - Anchored to gantt-root */}
       <div className="gantt-unit-indicator-container">
-        <span className="gantt-unit-pill">
-          Production Time (HH:mm)
-        </span>
+        <span className="gantt-unit-pill">Production Time (HH:mm)</span>
       </div>
 
-      {/* Wrap everything in a flex container */}
       <div style={{ display: 'flex' }}>
-
-        {/* 1. FIXED COLUMN: Machines (Y-Axis) */}
         <div className="machine-sidebar-fixed" >
           <div className="machine-column-header">Machines</div>
           {processedMachines.map((machine) => (
-            <div
-              key={machine.machineId}
-              className="machine-label"
-              style={{ height: rowHeight }}
-            >
+            <div key={machine.machineId} className="machine-label" style={{ height: rowHeight }}>
               {machine.machineId}
             </div>
           ))}
         </div>
 
-        {/* 2. SCROLLABLE COLUMN: Timeline (X-Axis) */}
-        <div className="gantt-scroll-container" style={{ flexGrow: 1, overflowX: 'auto' }}>
-          {/* Header with Timeline Axis */}
+        <div
+          className="gantt-scroll-container"
+          ref={scrollContainerRef}
+          style={{ flexGrow: 1, overflowX: 'auto' }}
+        >
           <div className="gantt-header">
             <div className="timeline-axis" style={{ width: maxTimeMins * pixelsPerMin }}>
               {Array.from({ length: Math.ceil(maxTimeMins / 5) + 1 }).map((_, i) => {
@@ -143,16 +155,12 @@ export default function GanttChart({ productionPlan }) {
                   <div key={mins} className="time-tick major" style={{ left: mins * pixelsPerMin }}>
                     <span className="time-text">{getClockLabel(mins)}</span>
                   </div>
-
                 );
               })}
             </div>
           </div>
 
-          {/* Body with NOW line and Operations */}
           <div className="gantt-body-relative" style={{ width: maxTimeMins * pixelsPerMin }}>
-
-            {/* NOW LINE OVERLAY - Positioned relative to the timeline start */}
             <div className="gantt-now-overlay" style={{ width: maxTimeMins * pixelsPerMin }}>
               <div className="now-line" style={{ left: nowLineX }}>
                 <div
@@ -170,11 +178,7 @@ export default function GanttChart({ productionPlan }) {
                 <div className="ops-container" style={{ width: maxTimeMins * pixelsPerMin, backgroundSize: `${pixelsPerMin}px 100%` }}>
                   {machine.operations.map((op) => {
                     const jobId = op.operationId.split("_")[1];
-
-                    // 1. Logic for Past (Finished)
                     const isFinished = (op.renderX + op.renderW) * pixelsPerMin < nowLineX;
-
-                    // 2. Logic for Running (Currently Active)
                     const isRunning = nowLineX >= (op.renderX * pixelsPerMin) &&
                       nowLineX <= (op.renderX + op.renderW) * pixelsPerMin;
 
@@ -182,9 +186,9 @@ export default function GanttChart({ productionPlan }) {
                       <div
                         key={op.operationId}
                         className={`op-bar 
-        ${hoveredOp && hoveredOp.operationId.split("_")[1] !== jobId ? 'is-faded' : ''} 
-        ${isFinished ? 'op-finished' : ''}
-        ${isRunning ? 'op-running' : ''}`}
+                          ${hoveredOp && hoveredOp.operationId.split("_")[1] !== jobId ? 'is-faded' : ''} 
+                          ${isFinished ? 'op-finished' : ''}
+                          ${isRunning ? 'op-running' : ''}`}
                         style={{
                           left: op.renderX * pixelsPerMin,
                           width: Math.max(op.renderW * pixelsPerMin - 4, 5),
@@ -194,7 +198,6 @@ export default function GanttChart({ productionPlan }) {
                         onMouseLeave={() => setHoveredOp(null)}
                       >
                         <div className="op-content" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0 8px' }}>
-                          {/* 3. Logic for Frozen (Lock Icon) */}
                           {op.isFrozen && <span style={{ fontSize: '12px' }}>🔒</span>}
                           <span className="op-id-label" style={{ fontWeight: isRunning ? '800' : '500' }}>
                             {op.operationId}
@@ -215,78 +218,36 @@ export default function GanttChart({ productionPlan }) {
         <div className="gantt-tooltip" style={{ left: hoveredOp.x + 15, top: hoveredOp.y - 10 }}>
           <div className="tooltip-header" style={{
             borderLeftColor: jobColors[hoveredOp.operationId.split("_")[1]],
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
           }}>
             <strong className="tooltip-title">{hoveredOp.operationId}</strong>
-            {/* Frozen indicator in the header */}
             {hoveredOp.isFrozen && <span title="Frozen" style={{ fontSize: '14px' }}>❄️</span>}
           </div>
-
           <div className="tooltip-body">
-            {/* ADDED: Order ID & Machine */}
-            <div className="tooltip-time-row">
-              <span className="tooltip-label">ORDER ID</span>
-              <strong className="tooltip-value">{hoveredOp.orderId}</strong>
-            </div>
-            <div className="tooltip-time-row">
-              <span className="tooltip-label">MACHINE</span>
-              <strong className="tooltip-value">{hoveredOp.machineId}</strong>
-            </div>
-            <div className="tooltip-time-row">
-              <span className="tooltip-label">STATUS</span>
-              <strong className="tooltip-value" style={{ textTransform: 'uppercase' }}>{hoveredOp.status}</strong>
-            </div>
-
+            <div className="tooltip-time-row"><span className="tooltip-label">ORDER ID</span><strong className="tooltip-value">{hoveredOp.orderId}</strong></div>
+            <div className="tooltip-time-row"><span className="tooltip-label">MACHINE</span><strong className="tooltip-value">{hoveredOp.machineId}</strong></div>
+            <div className="tooltip-time-row"><span className="tooltip-label">STATUS</span><strong className="tooltip-value" style={{ textTransform: 'uppercase' }}>{hoveredOp.status}</strong></div>
             <div className="tooltip-divider" style={{ margin: '8px 0', borderTop: '1px solid #e2e8f0' }}></div>
-
-            {/* KEPT: Original formatting for Dates and Times */}
-            <div className="tooltip-time-row">
-              <span className="tooltip-label">START DATE</span>
-              <strong className="tooltip-value">{new Date(hoveredOp.start).toLocaleDateString('en-US', {
-                weekday: 'short',
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-              })}</strong>
-            </div>
-            <div className="tooltip-time-row">
-              <span className="tooltip-label">START TIME</span>
-              <strong className="tooltip-value">{getFullTimeLabel(hoveredOp.renderX)}</strong>
-            </div>
-            <div className="tooltip-time-row">
-              <span className="tooltip-label">END TIME</span>
-              <strong className="tooltip-value">{getFullTimeLabel(hoveredOp.renderX + hoveredOp.renderW)}</strong>
-            </div>
-            <div className="tooltip-divider">
-              <span className="tooltip-label">DURATION: </span>
-              <span className="tooltip-duration">{Math.round(hoveredOp.duration_min)} min</span>
-            </div>
+            <div className="tooltip-time-row"><span className="tooltip-label">START DATE</span><strong className="tooltip-value">{new Date(hoveredOp.start).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</strong></div>
+            <div className="tooltip-time-row"><span className="tooltip-label">START TIME</span><strong className="tooltip-value">{getFullTimeLabel(hoveredOp.renderX)}</strong></div>
+            <div className="tooltip-time-row"><span className="tooltip-label">END TIME</span><strong className="tooltip-value">{getFullTimeLabel(hoveredOp.renderX + hoveredOp.renderW)}</strong></div>
+            <div className="tooltip-divider"><span className="tooltip-label">DURATION: </span><span className="tooltip-duration">{Math.round(hoveredOp.duration_min)} min</span></div>
           </div>
         </div>
       )}
 
-      {/* NOW LINE VALIDATION TOOLTIP */}
+      {/* NOW TOOLTIP */}
       {hoveredNow && (
         <div className="gantt-tooltip now-validation-tooltip" style={{ left: hoveredNow.x + 15, top: hoveredNow.y - 10 }}>
           <div className="tooltip-header" style={{ borderLeftColor: '#ef4444' }}>
             <strong className="tooltip-title">Live Status</strong>
           </div>
           <div className="tooltip-body">
+            <div className="tooltip-time-row"><span className="tooltip-label">CURRENT TIME</span><strong className="tooltip-value" style={{ color: '#ef4444' }}>{getLivePrecisionTime()}</strong></div>
             <div className="tooltip-time-row">
-              <span className="tooltip-label">CURRENT TIME (HH:MM:SS)</span>
-              <strong className="tooltip-value" style={{ color: '#ef4444' }}>{getLivePrecisionTime()}</strong>
-            </div>
-            <div className="tooltip-time-row">
-              <span className="tooltip-label">CURRENT DATE</span>
+              <span className="tooltip-label">DATE</span>
               <strong className="tooltip-value" style={{ color: '#ef4444' }}>
-                {new Date(productionPlan.currentTime || now).toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric'
-                })}
+                {new Date(productionPlan.currentTime || now).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })}
               </strong>
             </div>
           </div>
