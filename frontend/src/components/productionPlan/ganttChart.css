@@ -1,62 +1,95 @@
+/* =========================================================
+   ROOT CONTAINER
+   ========================================================= */
+
 .gantt-root {
   --primary-bg: #ffffff;
   --secondary-bg: #f8fafc;
   --border-color: #e2e8f0;
   --text-main: #1e293b;
   --text-muted: #64748b;
+
   font-family: 'Inter', system-ui, sans-serif;
+
   border: 1px solid var(--border-color);
   border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
   background: var(--primary-bg);
+
   margin: 20px;
-  position: relative;
   padding: 10px;
+
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+
+  overflow: hidden;
+  position: relative;
 }
 
+
+/* =========================================================
+   SCROLL CONTAINER
+   ========================================================= */
+
 .gantt-scroll-container {
-  overflow-x: auto;
-  overflow-y: hidden;
   display: flex;
   flex-direction: column;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  max-width: 100vw;
+  scroll-behavior: smooth;
   position: relative;
 }
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
 
 .gantt-header {
   display: flex;
   background: var(--secondary-bg);
   border-bottom: 2px solid var(--border-color);
+
   position: sticky;
   top: 0;
-  /* z-index: 100; */
 }
 
 .machine-column-header {
-  padding-top: 30px;
   width: 140px;
   min-width: 140px;
+  height: 80px;
+
+  padding-top: 30px;
+
   background: var(--secondary-bg);
   border-right: 2px solid var(--border-color);
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   font-weight: 700;
   font-size: 12px;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+
   position: sticky;
   left: 0;
-  height: 80px;
-  /* z-index: 110; */
 }
+
+
+/* =========================================================
+   TIMELINE AXIS
+   ========================================================= */
 
 .timeline-axis {
   position: relative;
   height: 80px;
-  padding-right: 50px; /* Space at the end of the chart */
+
   margin-left: 20px;
+  padding-right: 50px;
 }
 
 .time-tick {
@@ -74,29 +107,182 @@
 .time-text {
   position: absolute;
   top: -26px;
-  left: 0;
-  transform: translateX(-50%); /* Centers the time string over the line */
-  font-size: 11px;
+
+  transform: translateX(-50%);
+
+  font-size: 10px;
   font-weight: 700;
   color: var(--text-main);
-  /* Prevents the first label from disappearing */
-  min-width: 50px; 
+
+  min-width: 50px;
   text-align: center;
+
+  padding: 0 5px;
+  background: var(--secondary-bg);
 }
+
+
+/* =========================================================
+   MACHINE ROWS
+   ========================================================= */
+
+.machine-row {
+  display: flex;
+  background: var(--primary-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.machine-label {
+  width: 140px;
+  min-width: 140px;
+
+  padding: 16px;
+
+  background: #ffffff;
+  border-right: 2px solid var(--border-color);
+
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-main);
+
+  display: flex;
+  align-items: center;
+
+  position: sticky;
+  left: 0;
+}
+
+
+/* =========================================================
+   OPERATIONS CONTAINER
+   ========================================================= */
+
+.ops-container {
+  position: relative;
+  flex-grow: 1;
+
+  margin-left: 20px;
+
+  overflow: visible;
+
+  background-image:
+    linear-gradient(to right, #f1f5f9 1px, transparent 1px);
+}
+
+
+/* =========================================================
+   OPERATION BARS
+   ========================================================= */
+
+.op-bar {
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+
+  padding: 0 8px;
+
+  border-radius: 6px;
+
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+
+  display: flex;
+  align-items: center;
+
+  cursor: pointer;
+  overflow: hidden;
+
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.op-bar:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+}
+
+.op-bar.is-faded {
+  opacity: 0.2;
+}
+
+
+/* =========================================================
+   RUNNING OPERATION (ANIMATION)
+   ========================================================= */
+
+.op-running {
+  outline: 2px solid #ffffff;
+
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+
+  animation: running-green-glow 2s infinite ease-in-out;
+}
+
+@keyframes running-green-glow {
+
+  0% {
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+    filter: brightness(1);
+  }
+
+  50% {
+    box-shadow: 0 0 18px rgba(16, 185, 129, 0.9);
+    filter: brightness(1.1);
+  }
+
+  100% {
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+    filter: brightness(1);
+  }
+}
+
+
+/* =========================================================
+   FINISHED OPERATIONS
+   ========================================================= */
+
+.op-finished {
+  opacity: 0.4;
+  filter: grayscale(100%);
+  border: 1px dashed rgba(0,0,0,0.1);
+}
+
+
+/* =========================================================
+   NOW LINE
+   ========================================================= */
 
 .gantt-body-relative {
   position: relative;
 }
 
+.gantt-now-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+
+  margin-left: 20px;
+
+  pointer-events: none;
+}
 
 .now-line {
   position: absolute;
   top: 0;
   bottom: 0;
+
   width: 2px;
+
   background: #ef4444;
+
   box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+
   transition: left 0.5s ease;
+
   z-index: 90;
 }
 
@@ -104,30 +290,28 @@
   position: absolute;
   top: 0;
   left: 50%;
+
   transform: translateX(-50%);
-  background: #ef4444;
-  color: white;
+
+  padding: 2px 6px;
+
   font-size: 10px;
   font-weight: 800;
-  padding: 2px 6px;
+
+  color: white;
+  background: #ef4444;
+
   border-radius: 4px;
-  cursor: pointer;
-  pointer-events: auto; /* Specifically enables hover on the tag itself */
+
   white-space: nowrap;
+
+  cursor: pointer;
+  pointer-events: auto;
 }
 
 .now-tag:hover {
-  background-color: #dc2626; /* Slightly darker red on hover */
+  background-color: #dc2626;
   transform: translateX(-50%) scale(1.05);
-}
-
-.gantt-now-overlay {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  pointer-events: none; /* Allows interacting with bars underneath the line */
-  /* z-index: 100; */
-  margin-left: 20px; /* Aligns with the ops container */
 }
 
 .now-validation-tooltip {
@@ -136,128 +320,41 @@
 }
 
 
+/* =========================================================
+   TOOLTIP
+   ========================================================= */
 
-
-
-
-.machine-row {
-  display: flex;
-  border-bottom: 1px solid var(--border-color);
-  background: var(--primary-bg);
-}
-
-.machine-label {
-  width: 140px;
-  min-width: 140px;
-  padding: 16px;
-  background: #ffffff !important;
-  font-weight: 700;
-  font-size: 14px;
-  color: var(--text-main);
-  border-right: 2px solid var(--border-color);
-  position: sticky;
-  left: 0;
-  /* z-index: 110; */
-  display: flex;
-  align-items: center;
-}
-
-.ops-container {
-  position: relative;
-  flex-grow: 1;
-  background-image: linear-gradient(to right, #f1f5f9 1px, transparent 1px);
-  overflow: visible; /* Important so the NOW tag isn't cut off */
-  margin-left: 20px; /* Space at the end of the chart */
-}
-
-.op-bar {
-  position: absolute;
-  top: 10px;
-  bottom: 10px;
-  border-radius: 6px;
-  color: white;
-  padding: 0 8px;
-  font-size: 11px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  /* z-index: 10; */
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.op-bar:hover {
-  filter: brightness(1.1);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
-  /* z-index: 95; */
-}
-
-.op-finished {
-  opacity: 0.5;
-  filter: grayscale(30%);
-}
-
-.op-bar.is-faded {
-  opacity: 0.2;
-}
-
-/* Running → Emerald Green pulse */
-.op-running {
-  outline: 2px solid #ffffff; /* Separates bar color from glow */
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.8); /* Emerald Green */
-  z-index: 20; 
-  animation: running-green-glow 2s infinite ease-in-out;
-}
-
-@keyframes running-green-glow {
-  0% { 
-    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); 
-    filter: brightness(1);
-  }
-  50% { 
-    box-shadow: 0 0 18px rgba(16, 185, 129, 0.9); 
-    filter: brightness(1.1); /* Bar itself subtly brightens */
-  }
-  100% { 
-    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); 
-    filter: brightness(1);
-  }
-}
-
-/* Past → Desaturated and tucked behind */
-.op-finished {
-  opacity: 0.4;
-  filter: grayscale(100%);
-  border: 1px dashed rgba(0,0,0,0.1); /* Subtle hint it's historical */
-}
-
-/* TOOLTIP STYLES */
 .gantt-tooltip {
   position: fixed;
-  background: rgba(255, 255, 255, 0.98);
+
+  min-width: 200px;
+
+  padding: 14px;
+
+  background: rgba(255,255,255,0.98);
   border: 1px solid var(--border-color);
   border-radius: 10px;
-  padding: 14px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  pointer-events: none;
-  min-width: 200px;
+
   backdrop-filter: blur(4px);
+
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+
+  z-index: 1000;
+
+  pointer-events: none;
 }
 
 .tooltip-header {
   border-left: 4px solid;
+
   padding-left: 10px;
   margin-bottom: 10px;
 }
 
 .tooltip-title {
   font-size: 14px;
-  color: var(--text-main);
   font-weight: 700;
+  color: var(--text-main);
 }
 
 .tooltip-time-row {
@@ -266,24 +363,30 @@
 
 .tooltip-label {
   display: block;
+
   font-size: 10px;
-  color: var(--text-muted);
   font-weight: 700;
+
   letter-spacing: 0.05em;
+
+  color: var(--text-muted);
 }
 
 .tooltip-value {
   font-size: 13px;
-  color: var(--text-main);
+
   font-family: 'Courier New', Courier, monospace;
+
+  color: var(--text-main);
 }
 
 .tooltip-divider {
-  border-top: 1px solid #f1f5f9;
-  padding-top: 8px;
   display: flex;
   align-items: center;
   gap: 8px;
+
+  border-top: 1px solid #f1f5f9;
+  padding-top: 8px;
 }
 
 .tooltip-duration {
@@ -294,73 +397,82 @@
 
 .current-date-small {
   font-size: 9px;
-  color: var(--text-muted);
   font-weight: 400;
+
   margin-top: 2px;
+
+  color: var(--text-muted);
 }
 
-/* Ensure the scrollbar doesn't feel infinite */
-.gantt-scroll-container {
-  overflow-x: auto;
-  max-width: 100vw; 
-  scroll-behavior: smooth; /* Makes the auto-scroll to NOW look nice */
-}
 
-/* Ensure time labels with dates don't overlap */
-.time-text {
-  font-size: 10px;
-  padding: 0 5px;
-  background: var(--secondary-bg);
-}
+/* =========================================================
+   UNIT INDICATOR
+   ========================================================= */
 
-/* The container that handles the centering logic */
 .gantt-unit-indicator-container {
   position: absolute;
+
   left: 53%;
-  top: 12px; /* Adjust this to match your header text height */
+  top: 12px;
+
   transform: translateX(-50%);
-  z-index: 5;
+
   pointer-events: none;
   white-space: nowrap;
+
+  z-index: 5;
 }
 
-/* The actual pill label styling */
 .gantt-unit-pill {
-  color: var(--text-muted);
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  background-color: var(--secondary-bg);
-  padding: 6px 16px;  
   display: flex;
   align-items: center;
   gap: 8px;
+
+  padding: 6px 16px;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+
+  color: var(--text-muted);
+
+  background-color: var(--secondary-bg);
 }
 
-/* THE TOGGLE CONTAINER */
+
+/* =========================================================
+   TIME MODE SWITCH
+   ========================================================= */
+
 .switch-container {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #f1f5f9;
+
   padding: 6px 12px;
-  border-radius: 20px;
+
+  background: #f1f5f9;
+
   border: 1px solid #e2e8f0;
+  border-radius: 20px;
 }
 
 .switch-label {
   font-size: 0.7rem;
   font-weight: 800;
-  color: #64748b;
-  letter-spacing: 0.05em;
+
   text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  color: #64748b;
 }
 
-/* THE ACTUAL SWITCH */
 .switch {
   position: relative;
   display: inline-block;
+
   width: 34px;
   height: 20px;
 }
@@ -373,31 +485,42 @@
 
 .slider {
   position: absolute;
-  cursor: pointer;
+
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+
   background-color: #cbd5e1;
-  transition: .3s;
+
   border-radius: 20px;
+
+  cursor: pointer;
+  transition: .3s;
 }
 
 .slider:before {
   position: absolute;
+
   content: "";
-  height: 14px;
+
   width: 14px;
+  height: 14px;
+
   left: 3px;
   bottom: 3px;
+
   background-color: white;
-  transition: .3s;
+
   border-radius: 50%;
+
+  transition: .3s;
+
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 input:checked + .slider {
-  background-color: #348502; /* Blue for 'Active' */
+  background-color: #348502;
 }
 
 input:checked + .slider:before {
