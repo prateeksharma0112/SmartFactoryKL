@@ -35,29 +35,29 @@ export default function GanttChart({ productionPlan }) {
     return snapped;
   }, [machines]);
 
-const processedMachines = useMemo(() => {
-  if (!snappedStartBase) return [];
-  return machines.map(machine => ({
-    ...machine,
-    operations: (machine.operations || []).map(op => {
-      const opStart = new Date(op.start);
-      const opEnd = new Date(op.end);
-      const startOffset = (opStart.getTime() - snappedStartBase.getTime()) / 60000;
-      const endOffset = (opEnd.getTime() - snappedStartBase.getTime()) / 60000;
+  const processedMachines = useMemo(() => {
+    if (!snappedStartBase) return [];
+    return machines.map(machine => ({
+      ...machine,
+      operations: (machine.operations || []).map(op => {
+        const opStart = new Date(op.start);
+        const opEnd = new Date(op.end);
+        const startOffset = (opStart.getTime() - snappedStartBase.getTime()) / 60000;
+        const endOffset = (opEnd.getTime() - snappedStartBase.getTime()) / 60000;
 
-      return { 
-        ...op, 
-        machineId: machine.machineId, // Added machine context
-        orderId: op.orderId, // Added Order ID
-        status: op.status, // Added status
-        isFrozen: op.isFrozen, // Added frozen flag
-        renderX: startOffset, 
-        renderW: endOffset - startOffset, 
-        duration_min: (opEnd.getTime() - opStart.getTime()) / 60000 
-      };
-    })
-  }));
-}, [machines, snappedStartBase]);
+        return {
+          ...op,
+          machineId: machine.machineId, // Added machine context
+          orderId: op.orderId, // Added Order ID
+          status: op.status, // Added status
+          isFrozen: op.isFrozen, // Added frozen flag
+          renderX: startOffset,
+          renderW: endOffset - startOffset,
+          duration_min: (opEnd.getTime() - opStart.getTime()) / 60000
+        };
+      })
+    }));
+  }, [machines, snappedStartBase]);
 
   const maxTimeMins = useMemo(() => {
     const allOps = processedMachines.flatMap(m => m.operations);
@@ -170,13 +170,21 @@ const processedMachines = useMemo(() => {
                 <div className="ops-container" style={{ width: maxTimeMins * pixelsPerMin, backgroundSize: `${pixelsPerMin}px 100%` }}>
                   {machine.operations.map((op) => {
                     const jobId = op.operationId.split("_")[1];
-                    const isRelatedJob = hoveredOp && hoveredOp.operationId.split("_")[1] === jobId;
+
+                    // 1. Logic for Past (Finished)
                     const isFinished = (op.renderX + op.renderW) * pixelsPerMin < nowLineX;
+
+                    // 2. Logic for Running (Currently Active)
+                    const isRunning = nowLineX >= (op.renderX * pixelsPerMin) &&
+                      nowLineX <= (op.renderX + op.renderW) * pixelsPerMin;
 
                     return (
                       <div
                         key={op.operationId}
-                        className={`op-bar ${hoveredOp && !isRelatedJob ? 'is-faded' : ''} ${isRelatedJob ? 'is-highlighted' : ''} ${isFinished ? 'op-finished' : ''}`}
+                        className={`op-bar 
+        ${hoveredOp && hoveredOp.operationId.split("_")[1] !== jobId ? 'is-faded' : ''} 
+        ${isFinished ? 'op-finished' : ''}
+        ${isRunning ? 'op-running' : ''}`}
                         style={{
                           left: op.renderX * pixelsPerMin,
                           width: Math.max(op.renderW * pixelsPerMin - 4, 5),
@@ -185,8 +193,12 @@ const processedMachines = useMemo(() => {
                         onMouseEnter={(e) => setHoveredOp({ ...op, x: e.clientX, y: e.clientY })}
                         onMouseLeave={() => setHoveredOp(null)}
                       >
-                        <div className="op-content">
-                          <span className="op-id-label">{op.operationId}</span>
+                        <div className="op-content" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0 8px' }}>
+                          {/* 3. Logic for Frozen (Lock Icon) */}
+                          {op.isFrozen && <span style={{ fontSize: '12px' }}>🔒</span>}
+                          <span className="op-id-label" style={{ fontWeight: isRunning ? '800' : '500' }}>
+                            {op.operationId}
+                          </span>
                         </div>
                       </div>
                     );

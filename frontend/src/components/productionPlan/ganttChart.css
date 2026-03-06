@@ -88,30 +88,6 @@
   position: relative;
 }
 
-/* THE VERTICAL NOW LINE */
-/* .now-line {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: #ef4444;
-  z-index: 100;
-  pointer-events: none;
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
-  transition: left 0.5s ease;
-} */
-
-/* .now-tag {
-  position: absolute;
-  top: -15px;
-  left: -15px;
-  background: #ef4444;
-  color: white;
-  font-size: 9px;
-  font-weight: bold;
-  padding: 2px 4px;
-  border-radius: 3px;
-} */
 
 .now-line {
   position: absolute;
@@ -121,6 +97,7 @@
   background: #ef4444;
   box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
   transition: left 0.5s ease;
+  z-index: 90;
 }
 
 .now-tag {
@@ -227,6 +204,36 @@
   opacity: 0.2;
 }
 
+/* Running → Emerald Green pulse */
+.op-running {
+  outline: 2px solid #ffffff; /* Separates bar color from glow */
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.8); /* Emerald Green */
+  z-index: 20; 
+  animation: running-green-glow 2s infinite ease-in-out;
+}
+
+@keyframes running-green-glow {
+  0% { 
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); 
+    filter: brightness(1);
+  }
+  50% { 
+    box-shadow: 0 0 18px rgba(16, 185, 129, 0.9); 
+    filter: brightness(1.1); /* Bar itself subtly brightens */
+  }
+  100% { 
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); 
+    filter: brightness(1);
+  }
+}
+
+/* Past → Desaturated and tucked behind */
+.op-finished {
+  opacity: 0.4;
+  filter: grayscale(100%);
+  border: 1px dashed rgba(0,0,0,0.1); /* Subtle hint it's historical */
+}
+
 /* TOOLTIP STYLES */
 .gantt-tooltip {
   position: fixed;
@@ -235,7 +242,7 @@
   border-radius: 10px;
   padding: 14px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  /* z-index: 9999; */
+  z-index: 1000;
   pointer-events: none;
   min-width: 200px;
   backdrop-filter: blur(4px);
