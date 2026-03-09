@@ -17,7 +17,7 @@ const productionPlanHeader = ({
         </div>
 
         <p className="subtitle">
-          Real-time machine allocation and job sequence
+          Real-time machine allocation and job sequence visualization for optimized production flow.
         </p>
       </div>
 
