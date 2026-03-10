@@ -73,7 +73,7 @@ A toggleable feature that automatically scrolls the viewport to keep the "NOW" l
 
 ---
 
-# System Architecture
+# ⚙️ System Architecture
 
 The system follows a simple **client-server architecture**.
 ```
