@@ -74,21 +74,42 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
     }));
   }, [machines, snappedStartBase]);
 
-  // Calculate total chart width based on the furthest operation
+  // Calculate current time offset from chart start
+  const currentTimeOffset = useMemo(() => {
+    if (!snappedStartBase) return 0;
+    const localNow = new Date();
+    const shiftedNow = Date.now() - (localNow.getTimezoneOffset() * 60000);
+    const startUTC = snappedStartBase.getTime();
+    return (shiftedNow - startUTC) / 60000;
+  }, [snappedStartBase]);
+
+  // Calculate total chart width based on operations AND current time
   const maxTimeMins = useMemo(() => {
     const allOps = processedMachines.flatMap(m => m.operations);
-    return allOps.length > 0 ? Math.max(...allOps.map(op => op.renderX + op.renderW)) + 10 : 60;
-  }, [processedMachines]);
+    const opsMax = allOps.length > 0 ? Math.max(...allOps.map(op => op.renderX + op.renderW)) : 0;
+
+    // Calculate current time offset inline (no redundant variable)
+    let currentOffset = 0;
+    if (snappedStartBase) {
+      const localNow = new Date();
+      const shiftedNow = Date.now() - (localNow.getTimezoneOffset() * 60000);
+      const startUTC = snappedStartBase.getTime();
+      currentOffset = (shiftedNow - startUTC) / 60000;
+    }
+
+    const totalMax = Math.max(opsMax, currentOffset) + 10; // Include current time
+    return Math.max(totalMax, 60); // Minimum 60 minutes
+  }, [processedMachines, snappedStartBase]);
 
   // Calculate the horizontal pixel position for the "Now" line
   const nowLineX = useMemo(() => {
-    if (!snappedStartBase) return -1000;
+    if (!snappedStartBase) return 0;
     const localNow = new Date();
     const shiftedNow = Date.now() - (localNow.getTimezoneOffset() * 60000);
     const startUTC = snappedStartBase.getTime();
     const diffMins = (shiftedNow - startUTC) / 60000;
     return diffMins * pixelsPerMin;
-  }, [now, snappedStartBase, pixelsPerMin]);
+  }, [snappedStartBase, pixelsPerMin]);
 
   // Assign consistent colors to jobs based on their Job ID
   const jobColors = useMemo(() => {
