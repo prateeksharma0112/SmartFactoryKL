@@ -1,0 +1,30 @@
+version: "3.9"
+
+networks:
+  smartfactory_net:
+
+services:
+
+  backend:
+    build: ./backend
+    container_name: smartfactory_backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env.docker
+    restart: always
+    networks:
+      - smartfactory_net
+
+  frontend:
+    build: ./frontend
+    container_name: smartfactory_frontend
+    ports:
+      - "5173:80"
+    env_file:
+      - ./frontend/.env.docker
+    restart: always
+    depends_on:
+      - backend
+    networks:
+      - smartfactory_net
