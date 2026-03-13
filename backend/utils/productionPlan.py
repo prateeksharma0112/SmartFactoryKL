@@ -1,10 +1,11 @@
 import base64
 import requests
+from config import AAS_SHELLS_URL
 
 # Utility function to get machine idShort from AssignedResourceRef URL
 def get_machine_id(resource_url: str) -> str:
     encoded = base64.urlsafe_b64encode(resource_url.encode()).decode()
-    endpoint = f"http://localhost:8081/shells/{encoded}"
+    endpoint = f"{AAS_SHELLS_URL}/{encoded}"
     resp = requests.get(endpoint)
     if resp.status_code == 200:
         data = resp.json()

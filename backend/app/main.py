@@ -1,16 +1,16 @@
-import asyncio
 from typing import List
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from ws_endpoints.dashboard_ws import dashboard_endpoint
 from services.dashboard_service import build_dashboard
 from ws_endpoints.productionPlan_ws import productionPlan_endpoint
+from config import CORS_ORIGINS
 
 app = FastAPI(title="WEB GUI for AAS - Backend")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=CORS_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
 )

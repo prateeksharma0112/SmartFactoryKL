@@ -1,5 +1,5 @@
 import requests
-from .basyx_env_variable  import AAS_BASE_URL
+from config import AAS_BASE_URL
 
 def get_submodel(submodel_id: str) -> dict:
     url = f"{AAS_BASE_URL}/submodels/{submodel_id}"

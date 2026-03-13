@@ -1,9 +1,6 @@
 from basyx_client.aas import get_submodel
 from utils.dashboard import extract_factory_info, extract_islands_count, extract_orders_summary
-
-BOM_ID = "aHR0cHM6Ly9zbWFydGZhY3RvcnkuZGUvc3VibW9kZWxzLzBiZmJiNGMyLTk1MTAtNDMzNy04ODkzLWE1MGU4YTFkZDRmMjYw"
-NAMEPLATE_ID = "aHR0cHM6Ly9zbWFydGZhY3RvcnkuZGUvc3VibW9kZWxzLzNkOGMzMTVhLTljMDMtNDlkMy05ZTMxLTM5Y2MyMTY5ODVjZjYw"
-PRODUCTION_ORDERS_ID = "aHR0cHM6Ly9zbWFydGZhY3RvcnkuZGUvc3VibW9kZWxzLzIwOTRfMjE1MV8yMTUyXzA4NzY2MA"
+from config import BOM_ID, NAMEPLATE_ID, PRODUCTION_ORDERS_ID
 
 def build_dashboard() -> dict:
     nameplate = get_submodel(NAMEPLATE_ID)
