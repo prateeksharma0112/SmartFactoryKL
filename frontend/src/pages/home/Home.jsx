@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import FactoryInfoSection from "../../components/home/FactoryInfoSection";
 import OrdersOverviewSection from "../../components/home/OrdersOverviewSection";
-
+import config from "../../config";
 
 const Home = () => {
   const [data, setData] = useState({
@@ -13,7 +13,7 @@ const Home = () => {
     // 1. Initial Fetch to prevent blank screen
     const fetchInitialData = async () => {
       try {
-        const response = await fetch("http://localhost:8000/dashboard");
+        const response = await fetch(`${config.API_BASE_URL}/dashboard`);
         const result = await response.json();
         setData(result);
       } catch (err) {
@@ -24,7 +24,7 @@ const Home = () => {
     fetchInitialData();
 
     // 2. WebSocket Connection
-    let ws = new WebSocket("ws://localhost:8000/ws/dashboard");
+    let ws = new WebSocket(`${config.WS_BASE_URL}/ws/dashboard`);
 
     ws.onopen = () => console.log("Connected!");
     ws.onmessage = (event) => {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import GanttChart from "../../components/productionPlan/ganttChart";
 import ProductionHeader from "./productionPlanHeader";
+import config from "../../config";
 import "./productionPlan.css";
 
 const ProductionPlan = () => {
@@ -14,7 +15,7 @@ const ProductionPlan = () => {
   }, []);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:8000/ws/production_plan");
+    const ws = new WebSocket(`${config.WS_BASE_URL}/ws/production_plan`);
 
     ws.onopen = () => console.log("WebSocket connected!");
 
