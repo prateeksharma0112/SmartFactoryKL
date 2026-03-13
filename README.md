@@ -109,6 +109,7 @@ Fetches the production plan and visualizes it using an interactive Gantt chart.
 - Python
 - FastAPI
 - AAS Server (BaSyx)
+- Web Sockets
 - REST API providing production scheduling data
 
 ---
