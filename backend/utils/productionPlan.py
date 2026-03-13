@@ -1,19 +1,13 @@
 import base64
-import requests
-from config import AAS_SHELLS_URL
+from basyx_client.aas import get_shell
 
 # Utility function to get machine idShort from AssignedResourceRef URL
 def get_machine_id(resource_url: str) -> str:
-    encoded = base64.urlsafe_b64encode(resource_url.encode()).decode()
-    endpoint = f"{AAS_SHELLS_URL}/{encoded}"
-    resp = requests.get(endpoint)
-    if resp.status_code == 200:
-        data = resp.json()
-        return data.get("idShort", "UnknownMachine")
-    return "UnknownMachine"
+    encoded_shell_id = base64.urlsafe_b64encode(resource_url.encode()).decode()
+    shell = get_shell(encoded_shell_id)
+    return shell.get("idShort", "UnknownMachine")
 
-
-
+# Main function to extract production plan from Production Orders submodel
 def extract_production_plan(production_orders_submodel: dict) -> dict:
     machines = {}
     

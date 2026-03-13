@@ -1,4 +1,4 @@
-
+# Utility functions to extract dashboard info from AAS submodels
 def extract_islands_count(bom: dict) -> int:
     try:
         factory_entity = bom["submodelElements"][0]
@@ -8,7 +8,7 @@ def extract_islands_count(bom: dict) -> int:
         return 0
 
 
-
+# Function to extract factory info from Nameplate submodel
 def extract_factory_info(nameplate: dict) -> dict:
     elements = nameplate.get("submodelElements", [])
 
