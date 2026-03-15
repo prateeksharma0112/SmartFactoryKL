@@ -77,12 +77,17 @@ A toggleable feature that automatically scrolls the viewport to keep the "NOW" l
 
 The system follows a simple **client-server architecture**.
 ```
-Frontend (React UI)  
-        │  
-     REST API  
-        │  
-Backend Service (Production Plan Provider)
+Frontend (React)
+      │
+      │ REST / WebSocket
+      ▼
+Backend (FastAPI) (Production Plan Provider)
+      │
+      │ HTTP API
+      ▼
+BaSyx AAS Server (Data Provider)
 ```
+
 ### Backend
 Provides production plan data in JSON format.
 
@@ -108,9 +113,15 @@ Fetches the production plan and visualizes it using an interactive Gantt chart.
 ## Backend
 - Python
 - FastAPI
-- AAS Server (BaSyx)
 - Web Sockets
-- REST API providing production scheduling data
+
+### Infrastructure
+- Docker
+- Docker Compose
+
+### Data Source
+- Eclipse BaSyx AAS Server
+
 ---
 
 # 📦 Installation & Setup
