@@ -136,7 +136,6 @@ Ensure you have the following installed:
 - **Docker Compose** (included with Docker Desktop)
 - **Git** – https://git-scm.com/
 
-
 ---
 ## Clone the Repository
 
@@ -198,6 +197,7 @@ If you make changes to the backend or frontend:
 docker compose up --build
 ```
 
+---
 ## Project Structure
 ```bash
 GUI-AAS
@@ -220,3 +220,19 @@ If you prefer to run the services locally without Docker, refer to:
 - backend setup → backend/README.md
 
 - frontend setup → frontend/README.md
+
+---
+
+## 🔍 Troubleshooting
+
+#### Port already in use
+If port `8000` or `5173` is already in use, stop other services or change the port in `docker-compose.yml`.
+
+#### Containers not updating
+Rebuild the containers:
+```bash
+docker compose up --build
+```
+
+#### Cannot connect to AAS server
+Ensure the BaSyx AAS server is running and accessible.
