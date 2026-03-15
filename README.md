@@ -236,3 +236,42 @@ docker compose up --build
 
 #### Cannot connect to AAS server
 Ensure the BaSyx AAS server is running and accessible.
+
+---
+
+## 👥  Authors
+
+**Prateek  Kumar Sharma**  
+🎓 MSc Computer Science — RPTU Kaiserslautern-Landau  
+🔗 GitHub Profile: https://github.com/prateeksharma0112/
+
+**📍 Developed at**  
+SmartFactory-KL, DFKI (German Research Center for Artificial Intelligence)
+
+🎓 **Coursework (Master's Project)**  
+*Development of a GUI for an AAS-Based Production Planning System*
+
+---
+
+## 🤝 Acknowledgments
+I would like to express my gratitude to the following organizations and individuals:
+
+- **SmartFactory-KL / DFKI**: For organizing the project framework and providing the academic and research context of industrial production systems.
+
+- **Eclipse BaSyx**: For the open-source Asset Administration Shell (AAS) framework used in this project.
+
+- **RPTU Kaiserslautern-Landau**: For academic guidance and support during the Master's program.
+
+- **Supervisor**: Ali Karnoub at SmartFactory-KL for technical guidance and support.
+
+---
+
+## 📄 License
+
+This project is developed for **academic and research purposes** as part of the SmartFactory-KL student research project.
+
+Unless otherwise specified, the code in this repository is provided for **educational use only** and **cannot be used for commercial purposes** without explicit permission.
+
+For reuse or contributions, please **contact the author** or the **SmartFactory-KL / DFKI team**.
+
+---
