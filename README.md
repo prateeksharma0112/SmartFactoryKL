@@ -163,13 +163,13 @@ docker compose up --build
 ```
 
 This command will start the following services:
-```bash
-| Service    | Description           | Default URL                                          |
+
+| Service    | Description           | Default URL                                    |
 | ---------- | --------------------- | ---------------------------------------------- |
 | Frontend   | React dashboard       | [http://localhost:5173](http://localhost:5173) |
 | Backend    | FastAPI API service   | [http://localhost:8000](http://localhost:8000) |
-```
-Once the containers are running, access the Services from the above links.
+
+Once the containers are running, you can access the Services via the links above.
 
 **Ports can be changed in `docker-compose.yml` if needed.**
 
