@@ -111,5 +111,101 @@ Fetches the production plan and visualizes it using an interactive Gantt chart.
 - AAS Server (BaSyx)
 - Web Sockets
 - REST API providing production scheduling data
+---
+
+# 📦 Installation & Setup
+
+This project is fully containerized using **Docker**.  
+The easiest way to run the entire system (Frontend, Backend) is via **Docker Compose**.
+
+## Prerequisites
+Ensure you have the following installed:
+
+- **Docker** (v20 or higher) – https://www.docker.com/
+- **Docker Compose** (included with Docker Desktop)
+- **Git** – https://git-scm.com/
+
 
 ---
+## Clone the Repository
+
+```bash
+git clone https://github.com/your-username/SmartFactoryKL.git
+cd SmartFactoryKL
+```
+
+## Configure Environment Files
+
+Before running the application, configure the environment variables.
+
+Edit the following files and adjust the values if necessary:
+```bash
+frontend/.env.docker
+backend/.env.docker
+```
+These files contain configuration such as:
+
+- Backend API URL
+
+- AAS Server connection
+
+- CORS settings
+
+Make sure the URLs and ports match your environment.
+
+
+## Run the Application with Docker
+
+Start all services using Docker Compose:
+
+```bash
+docker compose up --build
+```
+
+This command will start the following services:
+```bash
+| Service    | Description           | Default URL                                          |
+| ---------- | --------------------- | ---------------------------------------------- |
+| Frontend   | React dashboard       | [http://localhost:5173](http://localhost:5173) |
+| Backend    | FastAPI API service   | [http://localhost:8000](http://localhost:8000) |
+```
+Once the containers are running, access the Services from the above links.
+
+**Ports can be changed in `docker-compose.yml` if needed.**
+
+
+## Stopping the Application
+
+To stop all containers:
+```bash
+docker compose down
+```
+
+## Rebuilding Containers
+If you make changes to the backend or frontend:
+```bash
+docker compose up --build
+```
+
+## Project Structure
+```bash
+GUI-AAS
+│
+├── frontend
+│   └── React application
+│     └── .env.docker # configure it
+│
+├── backend
+│   └── FastAPI service
+│     └── .env.docker # configure it
+│
+├── docker-compose.yml
+```
+
+## Running Without Docker (Optional)
+
+If you prefer to run the services locally without Docker, refer to:
+
+- backend setup → backend/README.md
+
+- frontend setup → frontend/README.md
