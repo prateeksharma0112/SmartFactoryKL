@@ -272,6 +272,6 @@ This project is developed for **academic and research purposes** as part of the 
 
 Unless otherwise specified, the code in this repository is provided for **educational use only** and **cannot be used for commercial purposes** without explicit permission.
 
-For reuse or contributions, please **contact the author** or the **SmartFactory-KL / DFKI team**.
+For reuse or contributions, please **contact the author** [Prateeksharma0112@gmail.com](Prateeksharma0112@gmail.com).
 
 ---
