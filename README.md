@@ -77,12 +77,17 @@ A toggleable feature that automatically scrolls the viewport to keep the "NOW" l
 
 The system follows a simple **client-server architecture**.
 ```
-Frontend (React UI)  
-        │  
-     REST API  
-        │  
-Backend Service (Production Plan Provider)
+Frontend (React)
+      │
+      │ REST / WebSocket
+      ▼
+Backend (FastAPI) (Production Plan Provider)
+      │
+      │ HTTP API
+      ▼
+BaSyx AAS Server (Data Provider)
 ```
+
 ### Backend
 Provides production plan data in JSON format.
 
@@ -108,9 +113,15 @@ Fetches the production plan and visualizes it using an interactive Gantt chart.
 ## Backend
 - Python
 - FastAPI
-- AAS Server (BaSyx)
 - Web Sockets
-- REST API providing production scheduling data
+
+### Infrastructure
+- Docker
+- Docker Compose
+
+### Data Source
+- Eclipse BaSyx AAS Server
+
 ---
 
 # 📦 Installation & Setup
@@ -124,7 +135,6 @@ Ensure you have the following installed:
 - **Docker** (v20 or higher) – https://www.docker.com/
 - **Docker Compose** (included with Docker Desktop)
 - **Git** – https://git-scm.com/
-
 
 ---
 ## Clone the Repository
@@ -187,6 +197,7 @@ If you make changes to the backend or frontend:
 docker compose up --build
 ```
 
+---
 ## Project Structure
 ```bash
 GUI-AAS
@@ -209,3 +220,58 @@ If you prefer to run the services locally without Docker, refer to:
 - backend setup → backend/README.md
 
 - frontend setup → frontend/README.md
+
+---
+
+## 🔍 Troubleshooting
+
+#### Port already in use
+If port `8000` or `5173` is already in use, stop other services or change the port in `docker-compose.yml`.
+
+#### Containers not updating
+Rebuild the containers:
+```bash
+docker compose up --build
+```
+
+#### Cannot connect to AAS server
+Ensure the BaSyx AAS server is running and accessible.
+
+---
+
+## 👥  Authors
+
+**Prateek  Kumar Sharma**  
+🎓 MSc Computer Science — RPTU Kaiserslautern-Landau  
+🔗 GitHub Profile: https://github.com/prateeksharma0112/
+
+**📍 Developed at**  
+SmartFactory-KL, DFKI (German Research Center for Artificial Intelligence)
+
+🎓 **Coursework (Master's Project)**  
+*Development of a GUI for an AAS-Based Production Planning System*
+
+---
+
+## 🤝 Acknowledgments
+I would like to express my gratitude to the following organizations and individuals:
+
+- **SmartFactory-KL / DFKI**: For organizing the project framework and providing the academic and research context of industrial production systems.
+
+- **Eclipse BaSyx**: For the open-source Asset Administration Shell (AAS) framework used in this project.
+
+- **RPTU Kaiserslautern-Landau**: For academic guidance and support during the Master's program.
+
+- **Supervisor**: Ali Karnoub at SmartFactory-KL for technical guidance and support.
+
+---
+
+## 📄 License
+
+This project is developed for **academic and research purposes** as part of the SmartFactory-KL student research project.
+
+Unless otherwise specified, the code in this repository is provided for **educational use only** and **cannot be used for commercial purposes** without explicit permission.
+
+For reuse or contributions, please **contact the author** [Prateeksharma0112@gmail.com](Prateeksharma0112@gmail.com).
+
+---
