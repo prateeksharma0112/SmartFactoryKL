@@ -3,6 +3,11 @@ from basyx_client.aas import get_shell
 
 # Utility function to get machine idShort from AssignedResourceRef URL
 def get_machine_id(resource_url: str) -> str:
+        # ---- TEST MODE ----
+    # If the value is already something like "P24", just return it
+    if not resource_url.startswith("http"):
+        return resource_url
+    # ---- ORIGINAL LOGIC ----
     encoded_shell_id = base64.urlsafe_b64encode(resource_url.encode()).decode()
     shell = get_shell(encoded_shell_id)
     return shell.get("idShort", "UnknownMachine")
