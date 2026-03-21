@@ -271,12 +271,11 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
                         onMouseEnter={(e) => setHoveredOp({ ...op, x: e.clientX, y: e.clientY })}
                         onMouseLeave={() => setHoveredOp(null)}
                       >
-                        <div className="op-content" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0 8px' }}>
-                          {op.isFrozen && <span style={{ fontSize: '12px' }}>🔒</span>}
-                          <span className="op-id-label" style={{ fontWeight: isRunning ? '800' : '500' }}>
-                            {op.operationId}
-                          </span>
-                        </div>
+                        {op.isFrozen && (
+                          <div className="op-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+                            <span style={{ fontSize: '12px' }}>🔒</span>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
