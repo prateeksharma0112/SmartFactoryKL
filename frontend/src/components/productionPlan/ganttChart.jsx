@@ -113,6 +113,7 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
   }, [productionPlan]);
 
   // Global chart start snapped to 5-minute boundaries (in local timezone).
+  // Includes a 30-minute buffer before NOW/first operation so NOW line appears in middle.
   const snappedStartBase = useMemo(() => {
     const allOps = machines.flatMap(m => m.operations || []);
     if (allOps.length === 0) return null;
@@ -121,9 +122,16 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
       new Date(current.start) < new Date(earliest.start) ? current : earliest
       , allOps[0]);
 
-    const actualStart = new Date(firstOp.start);
-    const snapped = new Date(actualStart);
-    snapped.setMinutes(Math.floor(actualStart.getMinutes() / 5) * 5, 0, 0);
+    // Use whichever is earlier: now or first operation start, then subtract 30-minute buffer
+    const nowTime = new Date();
+    const firstOpTime = new Date(firstOp.start);
+    const baseTime = nowTime < firstOpTime ? nowTime : firstOpTime;
+    
+    // Go back 30 minutes for buffer
+    const withBuffer = new Date(baseTime.getTime() - 30 * 60000);
+
+    const snapped = new Date(withBuffer);
+    snapped.setMinutes(Math.floor(withBuffer.getMinutes() / 5) * 5, 0, 0);
     return snapped;
   }, [machines]);
 
@@ -162,12 +170,12 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
 
     const totalMax = Math.max(opsMax, currentOffset) + 10; // Include current time
     return Math.max(totalMax, 60); // Minimum 60 minutes
-  }, [processedMachines, snappedStartBase]);
+  }, [processedMachines, snappedStartBase, now]);
 
   // Horizontal pixel location of the "Now" line.
   const nowLineX = useMemo(() => {
     return getCurrentOffsetMinutes(snappedStartBase) * pixelsPerMin;
-  }, [snappedStartBase, pixelsPerMin]);
+  }, [snappedStartBase, pixelsPerMin, now]);
 
   const orderColorMap = useMemo(() => {
     return buildOrderColorMap(processedMachines);
@@ -181,7 +189,9 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
       const viewportWidth = container.offsetWidth;
 
       if (viewportWidth > 0) {
-        const targetScroll = nowLineX - (viewportWidth / 2);
+        const centeredScroll = nowLineX - (viewportWidth / 2);
+        const maxScrollLeft = Math.max(container.scrollWidth - container.clientWidth, 0);
+        const targetScroll = Math.max(0, Math.min(centeredScroll, maxScrollLeft));
         container.scrollTo({
           left: targetScroll,
           behavior: 'smooth'
