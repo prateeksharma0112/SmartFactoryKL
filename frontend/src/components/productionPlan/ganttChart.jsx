@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import "./ganttChart.css";
 
 /**
@@ -161,6 +162,31 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
     return new Date().toLocaleTimeString('en-GB', { hour12: false });
   };
 
+  const getTooltipPosition = (point, tooltipWidth = 260, tooltipHeight = 160) => {
+    if (!point || typeof window === "undefined") {
+      return { left: 0, top: 0 };
+    }
+
+    const cursorGap = 14;
+    const viewportPad = 12;
+    const left = Math.max(
+      viewportPad,
+      Math.min(point.x + cursorGap, window.innerWidth - tooltipWidth - viewportPad)
+    );
+
+    // Prefer showing above cursor; flip below only when there is no space.
+    let top = point.y - tooltipHeight - cursorGap;
+    if (top < viewportPad) {
+      top = point.y + cursorGap;
+    }
+    top = Math.max(viewportPad, Math.min(top, window.innerHeight - tooltipHeight - viewportPad));
+
+    return { left, top };
+  };
+
+  const opTooltipPos = hoveredOp ? getTooltipPosition(hoveredOp, 320, 260) : null;
+  const nowTooltipPos = hoveredNow ? getTooltipPosition(hoveredNow, 260, 150) : null;
+
   // --- 5. RENDER ---
   if (processedMachines.length === 0) {
     return <div className="no-data">Initializing Schedule...</div>;
@@ -264,8 +290,8 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
       {/* --- TOOLTIPS --- */}
 
       {/* Operation Hover Details */}
-      {hoveredOp && (
-        <div className="gantt-tooltip" style={{ left: hoveredOp.x + 15, top: hoveredOp.y - 10 }}>
+      {hoveredOp && typeof document !== "undefined" && createPortal(
+        <div className="gantt-tooltip" style={{ left: opTooltipPos.left, top: opTooltipPos.top }}>
           <div className="tooltip-header" style={{
             borderLeftColor: jobColors[hoveredOp.operationId.split("_")[1]],
             display: 'flex', justifyContent: 'space-between', alignItems: 'center'
@@ -283,12 +309,13 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
             <div className="tooltip-time-row"><span className="tooltip-label">END TIME</span><strong className="tooltip-value">{getFullTimeLabel(hoveredOp.renderX + hoveredOp.renderW)}</strong></div>
             <div className="tooltip-divider"><span className="tooltip-label">DURATION: </span><span className="tooltip-duration">{Math.round(hoveredOp.duration_min)} min</span></div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* "Now" Line Validation Details */}
-      {hoveredNow && (
-        <div className="gantt-tooltip now-validation-tooltip" style={{ left: hoveredNow.x + 15, top: hoveredNow.y - 10 }}>
+      {hoveredNow && typeof document !== "undefined" && createPortal(
+        <div className="gantt-tooltip now-validation-tooltip" style={{ left: nowTooltipPos.left, top: nowTooltipPos.top }}>
           <div className="tooltip-header" style={{ borderLeftColor: '#ef4444' }}>
             <strong className="tooltip-title">Live Status</strong>
           </div>
@@ -301,7 +328,8 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
               </strong>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
