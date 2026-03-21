@@ -27,14 +27,11 @@ const getOrderKey = (op) => {
 };
 
 /**
- * Returns minutes elapsed between chart start and now, adjusted to UTC timeline used by the chart.
+ * Returns minutes elapsed between chart start and now in UTC.
  */
 const getCurrentOffsetMinutes = (startBase) => {
   if (!startBase) return 0;
-
-  const localNow = new Date();
-  const shiftedNow = Date.now() - (localNow.getTimezoneOffset() * 60000);
-  return (shiftedNow - startBase.getTime()) / 60000;
+  return (Date.now() - startBase.getTime()) / 60000;
 };
 
 /**
@@ -115,7 +112,7 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
     });
   }, [productionPlan]);
 
-  // Global chart start snapped to 5-minute boundaries.
+  // Global chart start snapped to 5-minute boundaries (in local timezone).
   const snappedStartBase = useMemo(() => {
     const allOps = machines.flatMap(m => m.operations || []);
     if (allOps.length === 0) return null;
@@ -126,7 +123,7 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
 
     const actualStart = new Date(firstOp.start);
     const snapped = new Date(actualStart);
-    snapped.setUTCMinutes(Math.floor(actualStart.getUTCMinutes() / 5) * 5, 0, 0);
+    snapped.setMinutes(Math.floor(actualStart.getMinutes() / 5) * 5, 0, 0);
     return snapped;
   }, [machines]);
 
@@ -197,13 +194,13 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
   const getClockLabel = (mins) => {
     if (!snappedStartBase) return "";
     const date = new Date(snappedStartBase.getTime() + mins * 60000);
-    return `${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}`;
+    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
   };
 
   const getFullTimeLabel = (mins) => {
     if (!snappedStartBase) return "";
     const date = new Date(snappedStartBase.getTime() + mins * 60000);
-    return `${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}:${String(date.getUTCSeconds()).padStart(2, '0')}`;
+    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
   };
 
   const getLivePrecisionTime = () => {
