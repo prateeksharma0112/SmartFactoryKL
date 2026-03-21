@@ -2,6 +2,23 @@ import React, { useMemo, useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import "./ganttChart.css";
 
+const getOrderKey = (op) => {
+  const rawOrderId = op?.orderId;
+
+  if (typeof rawOrderId === "string" || typeof rawOrderId === "number") {
+    const value = String(rawOrderId).trim();
+    return value || "Unknown";
+  }
+
+  if (rawOrderId && typeof rawOrderId === "object") {
+    const nestedValue = rawOrderId.value ?? rawOrderId.id ?? rawOrderId.orderId ?? rawOrderId.OrderID;
+    const value = String(nestedValue ?? "").trim();
+    return value || "Unknown";
+  }
+
+  return "Unknown";
+};
+
 /**
  * GanttChart Component
  * Renders a production schedule with real-time tracking, auto-scrolling, 
@@ -112,19 +129,23 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
     return diffMins * pixelsPerMin;
   }, [snappedStartBase, pixelsPerMin]);
 
-  // Assign consistent colors to jobs based on their Job ID
-  const jobColors = useMemo(() => {
-    const palette = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"];
-    const mapping = {};
-    let colorIndex = 0;
-    processedMachines.flatMap(m => m.operations).forEach(op => {
-      const jobId = op.operationId.split("_")[1];
-      if (jobId && !mapping[jobId]) {
-        mapping[jobId] = palette[colorIndex % palette.length];
-        colorIndex++;
-      }
+  const orderColorMap = useMemo(() => {
+    const keys = Array.from(new Set(
+      processedMachines.flatMap((m) => (m.operations || []).map((op) => getOrderKey(op)))
+    )).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }));
+
+    const total = Math.max(keys.length, 1);
+    const satBands = [72, 64, 56, 48];
+    const lightBands = [44, 52, 60];
+    const map = {};
+    keys.forEach((key, index) => {
+      const hue = (index * 360) / total;
+      const sat = satBands[Math.floor(index / 360) % satBands.length];
+      const light = lightBands[Math.floor(index / (360 * satBands.length)) % lightBands.length];
+      map[key] = `hsl(${hue.toFixed(2)}, ${sat}%, ${light}%)`;
     });
-    return mapping;
+
+    return map;
   }, [processedMachines]);
 
   // --- 3. INTERACTION LOGIC ---
@@ -186,6 +207,7 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
 
   const opTooltipPos = hoveredOp ? getTooltipPosition(hoveredOp, 320, 260) : null;
   const nowTooltipPos = hoveredNow ? getTooltipPosition(hoveredNow, 260, 150) : null;
+  const hoveredOrderKey = hoveredOp ? getOrderKey(hoveredOp) : null;
 
   // --- 5. RENDER ---
   if (processedMachines.length === 0) {
@@ -232,7 +254,7 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
 
           {/* Main Body: Operations Grid */}
           <div className="gantt-body-relative" style={{ width: maxTimeMins * pixelsPerMin }}>
-            
+
             {/* Real-time Indicator Overlay */}
             <div className="gantt-now-overlay" style={{ width: maxTimeMins * pixelsPerMin }}>
               <div className="now-line" style={{ left: nowLineX }}>
@@ -251,22 +273,22 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
               <div key={machine.machineId} className="machine-row" style={{ height: rowHeight }}>
                 <div className="ops-container" style={{ width: maxTimeMins * pixelsPerMin, backgroundSize: `${pixelsPerMin}px 100%` }}>
                   {machine.operations.map((op) => {
-                    const jobId = op.operationId.split("_")[1];
+                    const orderKey = getOrderKey(op);
                     const isFinished = (op.renderX + op.renderW) * pixelsPerMin < nowLineX;
                     const isRunning = nowLineX >= (op.renderX * pixelsPerMin) &&
-                                      nowLineX <= (op.renderX + op.renderW) * pixelsPerMin;
+                      nowLineX <= (op.renderX + op.renderW) * pixelsPerMin;
 
                     return (
                       <div
                         key={op.operationId}
                         className={`op-bar 
-                          ${hoveredOp && hoveredOp.operationId.split("_")[1] !== jobId ? 'is-faded' : ''} 
+                          ${hoveredOrderKey && hoveredOrderKey !== orderKey ? 'is-faded' : ''} 
                           ${isFinished ? 'op-finished' : ''}
                           ${isRunning ? 'op-running' : ''}`}
                         style={{
                           left: op.renderX * pixelsPerMin,
                           width: Math.max(op.renderW * pixelsPerMin - 4, 5),
-                          backgroundColor: jobColors[jobId],
+                          backgroundColor: orderColorMap[orderKey] || "#64748b",
                         }}
                         onMouseEnter={(e) => setHoveredOp({ ...op, x: e.clientX, y: e.clientY })}
                         onMouseLeave={() => setHoveredOp(null)}
@@ -292,7 +314,7 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
       {hoveredOp && typeof document !== "undefined" && createPortal(
         <div className="gantt-tooltip" style={{ left: opTooltipPos.left, top: opTooltipPos.top }}>
           <div className="tooltip-header" style={{
-            borderLeftColor: jobColors[hoveredOp.operationId.split("_")[1]],
+            borderLeftColor: orderColorMap[hoveredOrderKey] || "#64748b",
             display: 'flex', justifyContent: 'space-between', alignItems: 'center'
           }}>
             <strong className="tooltip-title">{hoveredOp.operationId}</strong>
