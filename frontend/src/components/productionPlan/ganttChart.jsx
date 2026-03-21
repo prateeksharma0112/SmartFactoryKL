@@ -2,6 +2,13 @@ import React, { useMemo, useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import "./ganttChart.css";
 
+const DEFAULT_BAR_COLOR = "#64748b";
+const COLOR_SATURATION_BANDS = [72, 64, 56, 48];
+const COLOR_LIGHTNESS_BANDS = [44, 52, 60];
+
+/**
+ * Normalizes order id from mixed payload shapes (string/number/object).
+ */
 const getOrderKey = (op) => {
   const rawOrderId = op?.orderId;
 
@@ -20,31 +27,87 @@ const getOrderKey = (op) => {
 };
 
 /**
+ * Returns minutes elapsed between chart start and now, adjusted to UTC timeline used by the chart.
+ */
+const getCurrentOffsetMinutes = (startBase) => {
+  if (!startBase) return 0;
+
+  const localNow = new Date();
+  const shiftedNow = Date.now() - (localNow.getTimezoneOffset() * 60000);
+  return (shiftedNow - startBase.getTime()) / 60000;
+};
+
+/**
+ * Builds deterministic colors per order id for the visible dataset.
+ */
+const buildOrderColorMap = (machines) => {
+  const keys = Array.from(new Set(
+    machines.flatMap((m) => (m.operations || []).map((op) => getOrderKey(op)))
+  )).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }));
+
+  const total = Math.max(keys.length, 1);
+  const map = {};
+
+  keys.forEach((key, index) => {
+    const hue = (index * 360) / total;
+    const sat = COLOR_SATURATION_BANDS[Math.floor(index / 360) % COLOR_SATURATION_BANDS.length];
+    const light = COLOR_LIGHTNESS_BANDS[Math.floor(index / (360 * COLOR_SATURATION_BANDS.length)) % COLOR_LIGHTNESS_BANDS.length];
+    map[key] = `hsl(${hue.toFixed(2)}, ${sat}%, ${light}%)`;
+  });
+
+  return map;
+};
+
+/**
+ * Keeps tooltip fully visible in the viewport while following cursor position.
+ */
+const getTooltipPosition = (point, tooltipWidth = 260, tooltipHeight = 160) => {
+  if (!point || typeof window === "undefined") {
+    return { left: 0, top: 0 };
+  }
+
+  const cursorGap = 14;
+  const viewportPad = 12;
+  const left = Math.max(
+    viewportPad,
+    Math.min(point.x + cursorGap, window.innerWidth - tooltipWidth - viewportPad)
+  );
+
+  // Prefer showing above cursor; flip below when there is no space.
+  let top = point.y - tooltipHeight - cursorGap;
+  if (top < viewportPad) {
+    top = point.y + cursorGap;
+  }
+
+  top = Math.max(viewportPad, Math.min(top, window.innerHeight - tooltipHeight - viewportPad));
+  return { left, top };
+};
+
+/**
  * GanttChart Component
  * Renders a production schedule with real-time tracking, auto-scrolling, 
  * and interactive tooltips for machine operations.
  */
 export default function GanttChart({ productionPlan, isFollowMode }) {
-  // --- STATE & REFS ---
+  // 1) Component state and refs
   const [hoveredOp, setHoveredOp] = useState(null);
   const [hoveredNow, setHoveredNow] = useState(null);
   const [now, setNow] = useState(Date.now());
   const scrollContainerRef = useRef(null);
 
-  // --- CONFIGURATION CONSTANTS ---
+  // 2) Layout constants
   const pixelsPerMin = 30; // Horizontal scale
   const rowHeight = 90;    // Vertical machine row height
 
-  // --- 1. LIFECYCLE / TIMERS ---
+  // 3) Lifecycle timers
   useEffect(() => {
-    // Update the "Now" line position every 10 seconds
+    // Keeps "now" tooltip date/time refreshed.
     const timer = setInterval(() => setNow(Date.now()), 10000);
     return () => clearInterval(timer);
   }, []);
 
-  // --- 2. DATA ORCHESTRATION (useMemo) ---
-
-  // Sort machines alphanumerically (e.g., M1, M2, M10)
+  // 4) Data preparation
+  // Sort machines alphanumerically (M1, M2, M10).
   const machines = useMemo(() => {
     if (!productionPlan?.machines) return [];
     return [...productionPlan.machines].sort((a, b) => {
@@ -52,7 +115,7 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
     });
   }, [productionPlan]);
 
-  // Determine the global start time of the chart, snapped to the nearest 5-minute block
+  // Global chart start snapped to 5-minute boundaries.
   const snappedStartBase = useMemo(() => {
     const allOps = machines.flatMap(m => m.operations || []);
     if (allOps.length === 0) return null;
@@ -67,7 +130,7 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
     return snapped;
   }, [machines]);
 
-  // Transform raw machine/operation data into renderable coordinates
+  // Compute x/width coordinates for rendering.
   const processedMachines = useMemo(() => {
     if (!snappedStartBase) return [];
     return machines.map(machine => ({
@@ -92,65 +155,29 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
     }));
   }, [machines, snappedStartBase]);
 
-  // Calculate current time offset from chart start
-  const currentTimeOffset = useMemo(() => {
-    if (!snappedStartBase) return 0;
-    const localNow = new Date();
-    const shiftedNow = Date.now() - (localNow.getTimezoneOffset() * 60000);
-    const startUTC = snappedStartBase.getTime();
-    return (shiftedNow - startUTC) / 60000;
-  }, [snappedStartBase]);
-
-  // Calculate total chart width based on operations AND current time
+  // 5) Visual model (time scale + colors)
+  // Chart width includes both operations and current time line.
   const maxTimeMins = useMemo(() => {
     const allOps = processedMachines.flatMap(m => m.operations);
     const opsMax = allOps.length > 0 ? Math.max(...allOps.map(op => op.renderX + op.renderW)) : 0;
 
-    // Calculate current time offset inline (no redundant variable)
-    let currentOffset = 0;
-    if (snappedStartBase) {
-      const localNow = new Date();
-      const shiftedNow = Date.now() - (localNow.getTimezoneOffset() * 60000);
-      const startUTC = snappedStartBase.getTime();
-      currentOffset = (shiftedNow - startUTC) / 60000;
-    }
+    const currentOffset = getCurrentOffsetMinutes(snappedStartBase);
 
     const totalMax = Math.max(opsMax, currentOffset) + 10; // Include current time
     return Math.max(totalMax, 60); // Minimum 60 minutes
   }, [processedMachines, snappedStartBase]);
 
-  // Calculate the horizontal pixel position for the "Now" line
+  // Horizontal pixel location of the "Now" line.
   const nowLineX = useMemo(() => {
-    if (!snappedStartBase) return 0;
-    const localNow = new Date();
-    const shiftedNow = Date.now() - (localNow.getTimezoneOffset() * 60000);
-    const startUTC = snappedStartBase.getTime();
-    const diffMins = (shiftedNow - startUTC) / 60000;
-    return diffMins * pixelsPerMin;
+    return getCurrentOffsetMinutes(snappedStartBase) * pixelsPerMin;
   }, [snappedStartBase, pixelsPerMin]);
 
   const orderColorMap = useMemo(() => {
-    const keys = Array.from(new Set(
-      processedMachines.flatMap((m) => (m.operations || []).map((op) => getOrderKey(op)))
-    )).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }));
-
-    const total = Math.max(keys.length, 1);
-    const satBands = [72, 64, 56, 48];
-    const lightBands = [44, 52, 60];
-    const map = {};
-    keys.forEach((key, index) => {
-      const hue = (index * 360) / total;
-      const sat = satBands[Math.floor(index / 360) % satBands.length];
-      const light = lightBands[Math.floor(index / (360 * satBands.length)) % lightBands.length];
-      map[key] = `hsl(${hue.toFixed(2)}, ${sat}%, ${light}%)`;
-    });
-
-    return map;
+    return buildOrderColorMap(processedMachines);
   }, [processedMachines]);
 
-  // --- 3. INTERACTION LOGIC ---
-
-  // Handle Follow Mode: Keep the "Now" line centered in the viewport
+  // 6) Interaction logic
+  // Follow mode keeps the current time line near center.
   useEffect(() => {
     if (isFollowMode && scrollContainerRef.current && typeof nowLineX === 'number' && nowLineX > -1000) {
       const container = scrollContainerRef.current;
@@ -166,7 +193,7 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
     }
   }, [nowLineX, isFollowMode]);
 
-  // --- 4. FORMATTING HELPERS ---
+  // 7) Formatting helpers
   const getClockLabel = (mins) => {
     if (!snappedStartBase) return "";
     const date = new Date(snappedStartBase.getTime() + mins * 60000);
@@ -183,33 +210,12 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
     return new Date().toLocaleTimeString('en-GB', { hour12: false });
   };
 
-  const getTooltipPosition = (point, tooltipWidth = 260, tooltipHeight = 160) => {
-    if (!point || typeof window === "undefined") {
-      return { left: 0, top: 0 };
-    }
-
-    const cursorGap = 14;
-    const viewportPad = 12;
-    const left = Math.max(
-      viewportPad,
-      Math.min(point.x + cursorGap, window.innerWidth - tooltipWidth - viewportPad)
-    );
-
-    // Prefer showing above cursor; flip below only when there is no space.
-    let top = point.y - tooltipHeight - cursorGap;
-    if (top < viewportPad) {
-      top = point.y + cursorGap;
-    }
-    top = Math.max(viewportPad, Math.min(top, window.innerHeight - tooltipHeight - viewportPad));
-
-    return { left, top };
-  };
-
+  // 8) Derived UI state
   const opTooltipPos = hoveredOp ? getTooltipPosition(hoveredOp, 320, 260) : null;
   const nowTooltipPos = hoveredNow ? getTooltipPosition(hoveredNow, 260, 150) : null;
   const hoveredOrderKey = hoveredOp ? getOrderKey(hoveredOp) : null;
 
-  // --- 5. RENDER ---
+  // 9) Render
   if (processedMachines.length === 0) {
     return <div className="no-data">Initializing Schedule...</div>;
   }
@@ -288,7 +294,7 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
                         style={{
                           left: op.renderX * pixelsPerMin,
                           width: Math.max(op.renderW * pixelsPerMin - 4, 5),
-                          backgroundColor: orderColorMap[orderKey] || "#64748b",
+                          backgroundColor: orderColorMap[orderKey] || DEFAULT_BAR_COLOR,
                         }}
                         onMouseEnter={(e) => setHoveredOp({ ...op, x: e.clientX, y: e.clientY })}
                         onMouseLeave={() => setHoveredOp(null)}
@@ -314,7 +320,7 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
       {hoveredOp && typeof document !== "undefined" && createPortal(
         <div className="gantt-tooltip" style={{ left: opTooltipPos.left, top: opTooltipPos.top }}>
           <div className="tooltip-header" style={{
-            borderLeftColor: orderColorMap[hoveredOrderKey] || "#64748b",
+            borderLeftColor: orderColorMap[hoveredOrderKey] || DEFAULT_BAR_COLOR,
             display: 'flex', justifyContent: 'space-between', alignItems: 'center'
           }}>
             <strong className="tooltip-title">{hoveredOp.operationId}</strong>
