@@ -5,6 +5,15 @@ import "./ganttChart.css";
 const DEFAULT_BAR_COLOR = "#64748b";
 const COLOR_SATURATION_BANDS = [72, 64, 56, 48];
 const COLOR_LIGHTNESS_BANDS = [44, 52, 60];
+const NOW_REFRESH_INTERVAL_MS = 10000;
+const CHART_PRE_NOW_BUFFER_MIN = 30;
+const TIME_SNAP_MIN = 5;
+const CHART_TAIL_PADDING_MIN = 10;
+const CHART_MIN_DURATION_MIN = 60;
+const OP_BAR_GAP_PX = 4;
+const OP_BAR_MIN_WIDTH_PX = 5;
+const OP_TOOLTIP_SIZE = { width: 320, height: 260 };
+const NOW_TOOLTIP_SIZE = { width: 260, height: 150 };
 
 /**
  * Normalizes order id from mixed payload shapes (string/number/object).
@@ -27,11 +36,38 @@ const getOrderKey = (op) => {
 };
 
 /**
- * Returns minutes elapsed between chart start and now in UTC.
+ * Returns minutes elapsed between chart start and now.
+ * Epoch-time math is timezone-agnostic, so no manual offset conversion is needed.
  */
 const getCurrentOffsetMinutes = (startBase) => {
   if (!startBase) return 0;
   return (Date.now() - startBase.getTime()) / 60000;
+};
+
+/**
+ * Returns the earliest operation found across all machines, or null for empty datasets.
+ */
+const getEarliestOperation = (machines) => {
+  const allOps = machines.flatMap((m) => m.operations || []);
+  if (allOps.length === 0) return null;
+
+  return allOps.reduce((earliest, current) =>
+    new Date(current.start) < new Date(earliest.start) ? current : earliest,
+    allOps[0]
+  );
+};
+
+/**
+ * Formats local time labels used on the axis and in tooltips.
+ */
+const formatLocalTime = (date, includeSeconds = false) => {
+  const hh = String(date.getHours()).padStart(2, "0");
+  const mm = String(date.getMinutes()).padStart(2, "0");
+
+  if (!includeSeconds) return `${hh}:${mm}`;
+
+  const ss = String(date.getSeconds()).padStart(2, "0");
+  return `${hh}:${mm}:${ss}`;
 };
 
 /**
@@ -99,7 +135,7 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
   // 3) Lifecycle timers
   useEffect(() => {
     // Keeps "now" tooltip date/time refreshed.
-    const timer = setInterval(() => setNow(Date.now()), 10000);
+    const timer = setInterval(() => setNow(Date.now()), NOW_REFRESH_INTERVAL_MS);
     return () => clearInterval(timer);
   }, []);
 
@@ -115,12 +151,8 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
   // Global chart start snapped to 5-minute boundaries (in local timezone).
   // Includes a 30-minute buffer before NOW/first operation so NOW line appears in middle.
   const snappedStartBase = useMemo(() => {
-    const allOps = machines.flatMap(m => m.operations || []);
-    if (allOps.length === 0) return null;
-
-    const firstOp = allOps.reduce((earliest, current) =>
-      new Date(current.start) < new Date(earliest.start) ? current : earliest
-      , allOps[0]);
+    const firstOp = getEarliestOperation(machines);
+    if (!firstOp) return null;
 
     // Use whichever is earlier: now or first operation start, then subtract 30-minute buffer
     const nowTime = new Date();
@@ -128,10 +160,14 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
     const baseTime = nowTime < firstOpTime ? nowTime : firstOpTime;
     
     // Go back 30 minutes for buffer
-    const withBuffer = new Date(baseTime.getTime() - 30 * 60000);
+    const withBuffer = new Date(baseTime.getTime() - CHART_PRE_NOW_BUFFER_MIN * 60000);
 
     const snapped = new Date(withBuffer);
-    snapped.setMinutes(Math.floor(withBuffer.getMinutes() / 5) * 5, 0, 0);
+    snapped.setMinutes(
+      Math.floor(withBuffer.getMinutes() / TIME_SNAP_MIN) * TIME_SNAP_MIN,
+      0,
+      0
+    );
     return snapped;
   }, [machines]);
 
@@ -168,8 +204,8 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
 
     const currentOffset = getCurrentOffsetMinutes(snappedStartBase);
 
-    const totalMax = Math.max(opsMax, currentOffset) + 10; // Include current time
-    return Math.max(totalMax, 60); // Minimum 60 minutes
+    const totalMax = Math.max(opsMax, currentOffset) + CHART_TAIL_PADDING_MIN; // Include current time
+    return Math.max(totalMax, CHART_MIN_DURATION_MIN); // Minimum timeline width
   }, [processedMachines, snappedStartBase, now]);
 
   // Horizontal pixel location of the "Now" line.
@@ -189,6 +225,7 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
       const viewportWidth = container.offsetWidth;
 
       if (viewportWidth > 0) {
+        // Clamp target so follow mode never overshoots scroll boundaries.
         const centeredScroll = nowLineX - (viewportWidth / 2);
         const maxScrollLeft = Math.max(container.scrollWidth - container.clientWidth, 0);
         const targetScroll = Math.max(0, Math.min(centeredScroll, maxScrollLeft));
@@ -204,22 +241,22 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
   const getClockLabel = (mins) => {
     if (!snappedStartBase) return "";
     const date = new Date(snappedStartBase.getTime() + mins * 60000);
-    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+    return formatLocalTime(date);
   };
 
   const getFullTimeLabel = (mins) => {
     if (!snappedStartBase) return "";
     const date = new Date(snappedStartBase.getTime() + mins * 60000);
-    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+    return formatLocalTime(date, true);
   };
 
   const getLivePrecisionTime = () => {
-    return new Date().toLocaleTimeString('en-GB', { hour12: false });
+    return new Date().toLocaleTimeString("en-GB", { hour12: false });
   };
 
   // 8) Derived UI state
-  const opTooltipPos = hoveredOp ? getTooltipPosition(hoveredOp, 320, 260) : null;
-  const nowTooltipPos = hoveredNow ? getTooltipPosition(hoveredNow, 260, 150) : null;
+  const opTooltipPos = hoveredOp ? getTooltipPosition(hoveredOp, OP_TOOLTIP_SIZE.width, OP_TOOLTIP_SIZE.height) : null;
+  const nowTooltipPos = hoveredNow ? getTooltipPosition(hoveredNow, NOW_TOOLTIP_SIZE.width, NOW_TOOLTIP_SIZE.height) : null;
   const hoveredOrderKey = hoveredOp ? getOrderKey(hoveredOp) : null;
 
   // 9) Render
@@ -300,7 +337,7 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
                           ${isRunning ? 'op-running' : ''}`}
                         style={{
                           left: op.renderX * pixelsPerMin,
-                          width: Math.max(op.renderW * pixelsPerMin - 4, 5),
+                          width: Math.max(op.renderW * pixelsPerMin - OP_BAR_GAP_PX, OP_BAR_MIN_WIDTH_PX),
                           backgroundColor: orderColorMap[orderKey] || DEFAULT_BAR_COLOR,
                         }}
                         onMouseEnter={(e) => setHoveredOp({ ...op, x: e.clientX, y: e.clientY })}
