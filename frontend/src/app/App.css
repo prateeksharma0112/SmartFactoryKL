@@ -63,12 +63,120 @@ nav .links a:hover {
   padding-bottom: 3rem;
 }
 
+.hero-value-section {
+  margin-bottom: 1.75rem;
+  padding: 1.4rem 1.6rem;
+  border: 1px solid #bfdbfe;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 85% 18%, rgba(59, 130, 246, 0.16), transparent 38%),
+    linear-gradient(135deg, #eff6ff 0%, #ffffff 52%, #f8fafc 100%);
+  box-shadow: 0 10px 24px -18px rgba(30, 58, 138, 0.55);
+}
+
+.hero-value-eyebrow {
+  margin: 0 0 0.45rem 0;
+  color: #1e40af;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.hero-value-title {
+  margin: 0;
+  color: #0b1633;
+  font-size: clamp(1.35rem, 2vw, 1.85rem);
+  font-weight: 800;
+  line-height: 1.2;
+  max-width: 34ch;
+  letter-spacing: -0.02em;
+}
+
+.hero-value-subtitle {
+  margin: 0.65rem 0 0.95rem 0;
+  max-width: 74ch;
+  color: #334155;
+  font-size: 0.98rem;
+}
+
+.hero-value-points {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.hero-point {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.32rem 0.7rem;
+  border: 1px solid #c7d2fe;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.74);
+  color: #1e3a8a;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.home-kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin-bottom: 1.25rem;
+}
+
+.home-kpi-tile {
+  padding: 1rem 1.05rem;
+  border-radius: 12px;
+  border: 1px solid #dbeafe;
+  background: #ffffff;
+  box-shadow: 0 10px 24px -22px rgba(30, 58, 138, 0.9);
+}
+
+.home-kpi-label {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #475569;
+}
+
+.home-kpi-value {
+  margin: 0.3rem 0 0.2rem 0;
+  color: #0b1633;
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.home-kpi-meta {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.home-sections-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.section {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 1.1rem 1.1rem 0.2rem 1.1rem;
+  box-shadow: 0 10px 24px -22px rgba(15, 23, 42, 0.8);
+}
+
 /* SECTION HEADINGS */
 .section-heading {
   text-align: left; /* Modern dashboards usually align headings left */
-  font-size: 1.875rem;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
+  font-size: 1.18rem;
+  font-weight: 800;
+  margin-bottom: 0.85rem;
   color: #0f172a;
 }
 
@@ -77,19 +185,31 @@ nav .links a:hover {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.1rem;
 }
 
 .card {
+  position: relative;
   background-color: #fff;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 22px -20px rgba(15, 23, 42, 0.85);
   border-radius: 12px;
   padding: 1.25rem;
   text-align: left;
+  overflow: hidden;
 }
 
-.card h3 {
+.card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #2563eb 0%, #0ea5e9 100%);
+}
+
+.card-title {
   font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -97,10 +217,18 @@ nav .links a:hover {
   color: #64748b;
 }
 
-.card p {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #1e3a8a;
+.card-value {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.15;
+}
+
+.card-description {
+  display: block;
+  margin-top: 0.45rem;
+  color: #64748b;
+  font-size: 0.78rem;
 }
 
 /* RESPONSIVE */
@@ -116,5 +244,30 @@ nav .links a:hover {
   
   .section-heading {
     font-size: 1.5rem;
+  }
+
+  .hero-value-section {
+    padding: 1rem;
+  }
+
+  .hero-value-title {
+    font-size: 1.1rem;
+    max-width: 100%;
+  }
+
+  .hero-value-subtitle {
+    font-size: 0.92rem;
+  }
+
+  .home-kpi-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .home-sections-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-heading {
+    font-size: 1.05rem;
   }
 }

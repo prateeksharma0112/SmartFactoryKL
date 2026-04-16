@@ -39,11 +39,52 @@ const Home = () => {
   }, []);
 
   const { factory, orders } = data;
+  const completionRate = orders.total > 0
+    ? Math.round((orders.finished / orders.total) * 100)
+    : 0;
+  const activeLoad = orders.total > 0
+    ? Math.round((orders.running / orders.total) * 100)
+    : 0;
 
   return (
     <div className="homepage-container">
-      <FactoryInfoSection factory={data.factory} />
-      <OrdersOverviewSection orders={data.orders} />
+      <section className="hero-value-section" aria-label="Product value statement">
+        <p className="hero-value-eyebrow">Trade Fair Demo View</p>
+        <h1 className="hero-value-title">SmartFactory KL Live Operations Cockpit</h1>
+        <p className="hero-value-subtitle">
+          Monitor production flow in real time, identify bottlenecks at a glance, and support faster scheduling decisions.
+        </p>
+        <div className="hero-value-points" role="list" aria-label="Core value points">
+          <span className="hero-point" role="listitem">Live Production Visibility</span>
+          <span className="hero-point" role="listitem">Rapid Bottleneck Detection</span>
+          <span className="hero-point" role="listitem">Decision-Ready Scheduling</span>
+        </div>
+      </section>
+
+      <section className="home-kpi-strip" aria-label="Operational summary">
+        <article className="home-kpi-tile">
+          <p className="home-kpi-label">Total Orders</p>
+          <p className="home-kpi-value">{orders.total}</p>
+          <p className="home-kpi-meta">All orders tracked in the current plan</p>
+        </article>
+
+        <article className="home-kpi-tile">
+          <p className="home-kpi-label">Completion Rate</p>
+          <p className="home-kpi-value">{completionRate}%</p>
+          <p className="home-kpi-meta">Share of orders already finished</p>
+        </article>
+
+        <article className="home-kpi-tile">
+          <p className="home-kpi-label">Active Load</p>
+          <p className="home-kpi-value">{activeLoad}%</p>
+          <p className="home-kpi-meta">Orders currently running in production</p>
+        </article>
+      </section>
+
+      <div className="home-sections-grid">
+        <FactoryInfoSection factory={factory} />
+        <OrdersOverviewSection orders={orders} />
+      </div>
     </div>
   );
 };
