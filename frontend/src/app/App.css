@@ -56,10 +56,10 @@ nav .links a:hover {
 /* MAIN CONTENT WRAPPER */
 .main-content {
   padding-top: 84px; /* Space for fixed nav + some breathing room */
-  max-width: 1400px; /* Increased to give the Gantt chart more width */
+  width: min(100% - 1.5rem, 1760px);
   margin: 0 auto;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
+  padding-left: clamp(0.75rem, 1.4vw, 1.5rem);
+  padding-right: clamp(0.75rem, 1.4vw, 1.5rem);
   padding-bottom: 3rem;
 }
 
@@ -89,7 +89,7 @@ nav .links a:hover {
   font-size: clamp(1.35rem, 2vw, 1.85rem);
   font-weight: 800;
   line-height: 1.2;
-  max-width: 34ch;
+  max-width: 44ch;
   letter-spacing: -0.02em;
 }
 
@@ -159,7 +159,7 @@ nav .links a:hover {
 
 .home-sections-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1.05fr 1fr;
   gap: 1rem;
 }
 
@@ -183,9 +183,15 @@ nav .links a:hover {
 /* DASHBOARD CARDS */
 .cards-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
   margin-bottom: 1.1rem;
+}
+
+@media (max-width: 1200px) {
+  .cards-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .card {
@@ -238,6 +244,7 @@ nav .links a:hover {
   }
   
   .main-content {
+    width: 100%;
     padding-left: 1rem;
     padding-right: 1rem;
   }
