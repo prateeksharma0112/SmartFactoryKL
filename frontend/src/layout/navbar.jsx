@@ -1,12 +1,29 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 const Navbar = () => {
+  const getNavLinkClass = ({ isActive }) =>
+    `nav-link${isActive ? " is-active" : ""}`;
+
   return (
-    <nav>
-      <div className="logo">SmartFactory KL</div>
-      <div className="links">
-        <Link to="/">Home</Link>
-        <Link to="/production-plan">Production Plan</Link>
+    <nav className="top-nav" aria-label="Main navigation">
+      <div className="nav-brand-block">
+        <p className="nav-brand">SmartFactory KL</p>
+        <p className="nav-subtitle">Live Operations Dashboard</p>
+      </div>
+
+      <div className="nav-links" role="list" aria-label="Primary routes">
+        <NavLink to="/" end className={getNavLinkClass}>
+          Home
+        </NavLink>
+        <NavLink to="/production-plan" className={getNavLinkClass}>
+          Production Plan
+        </NavLink>
+      </div>
+
+      <div className="nav-meta" aria-label="System context">
+        <span className="nav-badge">Trade Fair Mode</span>
+        <span className="nav-dot-separator" aria-hidden="true">•</span>
+        <span className="nav-build">Demo Ready</span>
       </div>
     </nav>
   );
