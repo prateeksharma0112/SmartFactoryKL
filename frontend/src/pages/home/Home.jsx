@@ -132,9 +132,9 @@ const Home = () => {
 
           <section className="sidebar-panel">
             <p className="sidebar-panel-label">Visitor Guide</p>
-            <p className="sidebar-note">1. Start with operational KPIs to assess current load.</p>
-            <p className="sidebar-note">2. Open Production Plan to inspect sequence and machine timing.</p>
-            <p className="sidebar-note">3. Use live status for confidence during demonstrations.</p>
+            <p className="sidebar-note">1. Use Total Orders, Completion Rate, and Active Load for a quick overview.</p>
+            <p className="sidebar-note">2. Open Production Plan to view machine operations on the timeline.</p>
+            <p className="sidebar-note">3. Use the NOW line and Follow Mode to track current execution in real time.</p>
           </section>
 
           <section className="sidebar-panel">
