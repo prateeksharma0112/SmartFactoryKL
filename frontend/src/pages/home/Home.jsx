@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import FactoryInfoSection from "../../components/home/FactoryInfoSection";
 import OperationsOverviewSection from "../../components/home/OperationsOverviewSection";
 import OrdersOverviewSection from "../../components/home/OrdersOverviewSection";
 import config from "../../config";
@@ -133,6 +132,39 @@ const Home = () => {
       </section>
 
       <div className="home-layout">
+        <aside className="home-sidebar home-sidebar-left" aria-label="Factory context sidebar">
+          <section className="sidebar-panel" aria-label="Factory context">
+            <p className="sidebar-panel-label">Factory Profile</p>
+            <p className="factory-profile-name">{factory.name || "-"}</p>
+            <p className="sidebar-note sidebar-note-compact">
+              Context block for the production KPIs shown in the center area.
+            </p>
+            <div className="context-chip-row">
+              <span className="context-chip">Country: {factory.country || "-"}</span>
+              <span className="context-chip">Islands: {factory.islandsCount ?? 0}</span>
+            </div>
+            <div className="context-list">
+              <div className="context-item">
+                <span className="context-key">Factory ID</span>
+                <span className="context-value">{factory.uniqueId || "-"}</span>
+              </div>
+              <div className="context-item">
+                <span className="context-key">Data Refresh</span>
+                <span className="context-value">2 s</span>
+              </div>
+            </div>
+          </section>
+
+          <section className="sidebar-panel">
+            <p className="sidebar-panel-label">System Stream</p>
+            <div className={`sidebar-status-pill status-${streamStatus}`}>
+              <span className="sidebar-status-dot" />
+              <span>{streamLabel}</span>
+            </div>
+            <p className="sidebar-note">Last update: {lastUpdateLabel}</p>
+          </section>
+        </aside>
+
         <main className="home-main">
         <section className="home-kpi-strip" aria-label="Operational summary">
           <article className="home-kpi-tile">
@@ -155,22 +187,12 @@ const Home = () => {
         </section>
 
         <div className="home-sections-grid">
-          <FactoryInfoSection factory={factory} />
           <OrdersOverviewSection orders={orders} />
           <OperationsOverviewSection operations={operations} />
         </div>
         </main>
 
-        <aside className="home-sidebar" aria-label="Live overview sidebar">
-          <section className="sidebar-panel">
-            <p className="sidebar-panel-label">System Stream</p>
-            <div className={`sidebar-status-pill status-${streamStatus}`}>
-              <span className="sidebar-status-dot" />
-              <span>{streamLabel}</span>
-            </div>
-            <p className="sidebar-note">Last update: {lastUpdateLabel}</p>
-          </section>
-
+        <aside className="home-sidebar home-sidebar-right" aria-label="Live overview sidebar">
           <section className="sidebar-panel">
             <p className="sidebar-panel-label">Visitor Guide</p>
             <p className="sidebar-note">1. Use Total Orders, Completion Rate, and Active Load for a quick overview.</p>
