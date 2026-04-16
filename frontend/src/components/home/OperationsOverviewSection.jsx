@@ -2,7 +2,7 @@ import Card from "./Card";
 
 const OperationsOverviewSection = ({ operations }) => {
   return (
-    <section className="section section-full">
+    <section className="section">
       <h2 className="section-heading">Operations Overview</h2>
       <div className="cards-row">
         <Card

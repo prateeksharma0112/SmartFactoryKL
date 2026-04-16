@@ -2,7 +2,7 @@ import Card from "./Card";
 
 const FactoryInfoSection = ({ factory }) => {
   return (
-    <section className="section">
+    <section className="section section-full">
       <h2 className="section-heading">Factory Info</h2>
       <div className="cards-row">
         <Card title="Name" value={factory.name || "-"} description="Configured factory instance" icon="" />
