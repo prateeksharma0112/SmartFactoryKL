@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import FactoryInfoSection from "../../components/home/FactoryInfoSection";
+import OperationsOverviewSection from "../../components/home/OperationsOverviewSection";
 import OrdersOverviewSection from "../../components/home/OrdersOverviewSection";
 import config from "../../config";
 
@@ -11,6 +12,12 @@ const Home = () => {
   });
   const [streamStatus, setStreamStatus] = useState("connecting");
   const [lastUpdate, setLastUpdate] = useState(null);
+  const [operations, setOperations] = useState({
+    total: 0,
+    running: 0,
+    finished: 0,
+    frozen: 0,
+  });
 
   useEffect(() => {
     // 1. Initial Fetch to prevent blank screen
@@ -47,6 +54,39 @@ const Home = () => {
 
     ws.onclose = () => {
       setStreamStatus((prev) => (prev === "issue" ? "issue" : "offline"));
+    };
+
+    return () => {
+      if (ws.readyState === WebSocket.OPEN) ws.close();
+    };
+  }, []);
+
+  useEffect(() => {
+    const ws = new WebSocket(`${config.WS_BASE_URL}/ws/production_plan`);
+
+    ws.onmessage = (event) => {
+      const payload = JSON.parse(event.data);
+      const machines = payload?.ProductionPlan?.machines || [];
+      const allOps = machines.flatMap((machine) => machine.operations || []);
+
+      const running = allOps.filter((op) =>
+        String(op?.status || "").toLowerCase() === "running"
+      ).length;
+      const finished = allOps.filter((op) =>
+        String(op?.status || "").toLowerCase() === "finished"
+      ).length;
+      const frozen = allOps.filter((op) => Boolean(op?.isFrozen)).length;
+
+      setOperations({
+        total: allOps.length,
+        running,
+        finished,
+        frozen,
+      });
+    };
+
+    ws.onerror = (err) => {
+      console.error("Operations WebSocket error:", err);
     };
 
     return () => {
@@ -117,6 +157,7 @@ const Home = () => {
         <div className="home-sections-grid">
           <FactoryInfoSection factory={factory} />
           <OrdersOverviewSection orders={orders} />
+          <OperationsOverviewSection operations={operations} />
         </div>
         </main>
 

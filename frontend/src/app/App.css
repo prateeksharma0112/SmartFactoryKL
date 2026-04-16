@@ -319,6 +319,10 @@ body {
   box-shadow: 0 10px 24px -22px rgba(15, 23, 42, 0.8);
 }
 
+.section-full {
+  grid-column: 1 / -1;
+}
+
 /* SECTION HEADINGS */
 .section-heading {
   text-align: left; /* Modern dashboards usually align headings left */
@@ -453,6 +457,10 @@ body {
 
   .home-sections-grid {
     grid-template-columns: 1fr;
+  }
+
+  .section-full {
+    grid-column: auto;
   }
 
   .section-heading {
