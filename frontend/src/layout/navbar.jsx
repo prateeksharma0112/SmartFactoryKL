@@ -19,12 +19,6 @@ const Navbar = () => {
           Production Plan
         </NavLink>
       </div>
-
-      <div className="nav-meta" aria-label="System context">
-        <span className="nav-badge">Trade Fair Mode</span>
-        <span className="nav-dot-separator" aria-hidden="true">•</span>
-        <span className="nav-build">Demo Ready</span>
-      </div>
     </nav>
   );
 };
