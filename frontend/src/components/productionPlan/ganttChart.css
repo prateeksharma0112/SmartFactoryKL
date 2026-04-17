@@ -5,20 +5,20 @@
 .gantt-root {
   --primary-bg: #ffffff;
   --secondary-bg: #f8fafc;
-  --border-color: #e2e8f0;
+  --border-color: #dbe7f3;
   --text-main: #1e293b;
   --text-muted: #64748b;
 
   font-family: 'Inter', system-ui, sans-serif;
 
-  border: 1px solid #d8e0ea;
+  border: 1px solid #dbe7f3;
   border-radius: 12px;
   background: var(--primary-bg);
 
   margin: 0;
   padding: 10px;
 
-  box-shadow: 0 12px 20px -20px rgb(15 23 42 / 0.45);
+  box-shadow: 0 12px 20px -20px rgb(15 23 42 / 0.3);
 
   overflow: hidden;
   position: relative;
@@ -435,8 +435,8 @@
 
   color: var(--text-muted);
 
-  background-color: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  background-color: #f8fbff;
+  border: 1px solid #dbe9f7;
 }
 
 

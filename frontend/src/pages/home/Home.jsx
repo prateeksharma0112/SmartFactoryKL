@@ -119,15 +119,18 @@ const Home = () => {
   return (
     <div className="homepage-container">
       <section className="hero-value-section" aria-label="Product value statement">
-        <p className="hero-value-eyebrow">Operational Overview</p>
-        <h1 className="hero-value-title">{`${factory.name || ""} Production Dashboard`}</h1>
+        <p className="hero-value-eyebrow">Hello, Welcome to</p>
+        <h1 className="hero-value-title">
+          <span className="hero-factory-name">{factory.name || "Factory"}</span>
+          <span className="hero-title-suffix"> Production Planning Dashboard</span>
+        </h1>
         <p className="hero-value-subtitle">
           Track factory performance continuously, surface constraints early, and support confident planning decisions.
         </p>
         <div className="hero-value-points" role="list" aria-label="Core value points">
-          <span className="hero-point" role="listitem">Operational Visibility</span>
-          <span className="hero-point" role="listitem">Constraint Alerts</span>
-          <span className="hero-point" role="listitem">Planning Support</span>
+          <span className="hero-point" role="listitem">Factory Live Status</span>
+          <span className="hero-point" role="listitem">Order-Machine Tracking</span>
+          <span className="hero-point" role="listitem">Timeline Review</span>
         </div>
       </section>
 
@@ -162,19 +165,19 @@ const Home = () => {
           <article className="home-kpi-tile">
             <p className="home-kpi-label">Total Orders</p>
             <p className="home-kpi-value">{orders.total}</p>
-            <p className="home-kpi-meta">All orders tracked in the current plan</p>
+            <p className="home-kpi-meta">Orders in current production cycle</p>
           </article>
 
           <article className="home-kpi-tile">
             <p className="home-kpi-label">Completion Rate</p>
             <p className="home-kpi-value">{completionRate}%</p>
-            <p className="home-kpi-meta">Share of orders already finished</p>
+            <p className="home-kpi-meta">Orders completed so far</p>
           </article>
 
           <article className="home-kpi-tile">
             <p className="home-kpi-label">Active Load</p>
             <p className="home-kpi-value">{activeLoad}%</p>
-            <p className="home-kpi-meta">Orders currently running in production</p>
+            <p className="home-kpi-meta">Orders currently in execution</p>
           </article>
         </section>
 
