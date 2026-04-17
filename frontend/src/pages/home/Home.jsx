@@ -119,49 +119,41 @@ const Home = () => {
   return (
     <div className="homepage-container">
       <section className="hero-value-section" aria-label="Product value statement">
-        <p className="hero-value-eyebrow">Trade Fair Demo View</p>
-        <h1 className="hero-value-title">SmartFactory KL Live Operations Cockpit</h1>
+        <p className="hero-value-eyebrow">Operational Overview</p>
+        <h1 className="hero-value-title">{`${factory.name || ""} Production Dashboard`}</h1>
         <p className="hero-value-subtitle">
-          Monitor production flow in real time, identify bottlenecks at a glance, and support faster scheduling decisions.
+          Track factory performance continuously, surface constraints early, and support confident planning decisions.
         </p>
         <div className="hero-value-points" role="list" aria-label="Core value points">
-          <span className="hero-point" role="listitem">Live Production Visibility</span>
-          <span className="hero-point" role="listitem">Rapid Bottleneck Detection</span>
-          <span className="hero-point" role="listitem">Decision-Ready Scheduling</span>
+          <span className="hero-point" role="listitem">Operational Visibility</span>
+          <span className="hero-point" role="listitem">Constraint Alerts</span>
+          <span className="hero-point" role="listitem">Planning Support</span>
         </div>
       </section>
 
       <div className="home-layout">
         <aside className="home-sidebar home-sidebar-left" aria-label="Factory context sidebar">
           <section className="sidebar-panel" aria-label="Factory context">
-            <p className="sidebar-panel-label">Factory Profile</p>
-            <p className="factory-profile-name">{factory.name || "-"}</p>
+            <p className="sidebar-panel-label">Facility Snapshot</p>
             <p className="sidebar-note sidebar-note-compact">
-              Context block for the production KPIs shown in the center area.
+              Site ID and country for the active facility.
             </p>
             <div className="context-chip-row">
               <span className="context-chip">Country: {factory.country || "-"}</span>
-              <span className="context-chip">Islands: {factory.islandsCount ?? 0}</span>
-            </div>
-            <div className="context-list">
-              <div className="context-item">
-                <span className="context-key">Factory ID</span>
-                <span className="context-value">{factory.uniqueId || "-"}</span>
-              </div>
-              <div className="context-item">
-                <span className="context-key">Data Refresh</span>
-                <span className="context-value">2 s</span>
-              </div>
+              <span className="context-chip">Site ID: {factory.uniqueId || "-"}</span>
             </div>
           </section>
 
           <section className="sidebar-panel">
-            <p className="sidebar-panel-label">System Stream</p>
+            <p className="sidebar-panel-label">Data Feed Status</p>
+            <p className="sidebar-note sidebar-note-compact">
+              Current connection state for live dashboard updates.
+            </p>
             <div className={`sidebar-status-pill status-${streamStatus}`}>
               <span className="sidebar-status-dot" />
               <span>{streamLabel}</span>
             </div>
-            <p className="sidebar-note">Last update: {lastUpdateLabel}</p>
+            <p className="sidebar-note sidebar-note-compact sidebar-note-muted">Last refresh: {lastUpdateLabel}</p>
           </section>
         </aside>
 
@@ -194,10 +186,10 @@ const Home = () => {
 
         <aside className="home-sidebar home-sidebar-right" aria-label="Live overview sidebar">
           <section className="sidebar-panel">
-            <p className="sidebar-panel-label">Visitor Guide</p>
-            <p className="sidebar-note">1. Use Total Orders, Completion Rate, and Active Load for a quick overview.</p>
-            <p className="sidebar-note">2. Open Production Plan to view machine operations on the timeline.</p>
-            <p className="sidebar-note">3. Use the NOW line and Follow Mode to track current execution in real time.</p>
+            <p className="sidebar-panel-label">Usage Guide</p>
+            <p className="sidebar-note">1. Start with Total Orders, Completion Rate, and Active Load for a quick health check.</p>
+            <p className="sidebar-note">2. Open Production Plan to inspect sequence and machine utilization on the timeline.</p>
+            <p className="sidebar-note">3. Use the NOW line and Auto-center timeline to keep current execution in focus.</p>
           </section>
 
           <section className="sidebar-panel">

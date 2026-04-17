@@ -7,8 +7,8 @@ const Navbar = () => {
   return (
     <nav className="top-nav" aria-label="Main navigation">
       <div className="nav-brand-block">
-        <p className="nav-brand">SmartFactory KL</p>
-        <p className="nav-subtitle">Live Operations Dashboard</p>
+        <p className="nav-brand">Asset Administration Shell</p>
+        <p className="nav-subtitle">Planning and Monitoring Platform</p>
       </div>
 
       <div className="nav-links" role="list" aria-label="Primary routes">
