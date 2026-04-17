@@ -122,7 +122,15 @@ const ProductionPlan = () => {
             />
           ) : (
             <div className="loading-container">
-              <div className="loader-dots">Loading Production Plan ...</div>
+              <div className="loading-panel" role="status" aria-live="polite" aria-atomic="true">
+                <p className="loading-title">Preparing Production Timeline</p>
+                <p className="loading-subtitle">Synchronizing machines, operations, and live status feed.</p>
+                <div className="loading-track" aria-hidden="true">
+                  <span className="loading-line loading-line-lg" />
+                  <span className="loading-line loading-line-md" />
+                  <span className="loading-line loading-line-sm" />
+                </div>
+              </div>
             </div>
           )}
         </div>
