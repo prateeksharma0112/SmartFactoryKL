@@ -349,24 +349,55 @@
     linear-gradient(135deg, #fbfdff 0%, #ffffff 62%, #f8fbff 100%);
   box-shadow: 0 14px 28px -24px rgba(30, 58, 138, 0.42);
   padding: 10px 10px 9px;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 .plan-snapshot-card {
-  border: 1px solid #dbe4ef;
+  position: relative;
+  border: 1px solid #bfdbfe;
   border-radius: 8px;
-  background: #ffffff;
+  background: linear-gradient(180deg, #ffffff 0%, #f4f9ff 100%);
   padding: 7px 8px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.plan-snapshot-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #1d4ed8 0%, #60a5fa 100%);
+  opacity: 0.55;
 }
 
 .plan-snapshot-card-running {
-  border-color: #cdeed7;
-  background: #f7fffa;
-  box-shadow: inset 0 0 0 1px rgba(22, 163, 74, 0.06);
+  border-color: #bae6fd;
+  background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);
+  box-shadow: inset 0 0 0 1px rgba(14, 165, 233, 0.08);
+}
+
+.plan-snapshot-card-running::before {
+  background: linear-gradient(90deg, #0284c7 0%, #0ea5e9 100%);
+}
+
+.plan-snapshot-card-running .plan-snapshot-value {
+  color: #0369a1;
 }
 
 .plan-snapshot-card-frozen {
-  border-color: #f8d7da;
-  background: #fffafb;
+  border-color: #fecaca;
+  background: linear-gradient(180deg, #ffffff 0%, #fef2f2 100%);
+}
+
+.plan-snapshot-card-frozen::before {
+  background: linear-gradient(90deg, #dc2626 0%, #ef4444 100%);
+}
+
+.plan-snapshot-card-frozen .plan-snapshot-value {
+  color: #b91c1c;
 }
 
 .plan-snapshot-label {
@@ -470,9 +501,10 @@
 .plan-guide-panel {
   border: 1px solid #dbe9f7;
   border-radius: 0;
-  background: #fbfdff;
+  background: linear-gradient(180deg, #fbfdff 0%, #ffffff 100%);
   padding: 12px 14px;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .plan-guide-panel > .plan-accordion-summary {
@@ -562,10 +594,24 @@
 }
 
 .plan-legend-finished {
-  background: #64748b;
+  background: #16a34a;
   opacity: 0.75;
   border-style: dashed;
-  border-color: #475569;
+  border-color: #15803d;
+}
+
+@media (hover: hover) {
+  .plan-snapshot-strip:hover,
+  .plan-guide-panel:hover {
+    transform: translateY(-2px);
+    border-color: #bfdbfe;
+    box-shadow: 0 16px 28px -24px rgba(30, 58, 138, 0.42);
+  }
+
+  .plan-snapshot-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 16px -14px rgba(30, 58, 138, 0.35);
+  }
 }
 
 .plan-legend-lock {
