@@ -8,6 +8,13 @@
   --border-color: #dbe7f3;
   --text-main: #1e293b;
   --text-muted: #64748b;
+  --axis-x-bg: #eef4ff;
+  --axis-y-bg: #f3f8ff;
+  --axis-divider: #c9d8ea;
+  --axis-tick-major: #334155;
+  --axis-tick-minor: #c7d5e6;
+  --axis-x-accent: #0284c7;
+  --axis-y-accent: #1d4ed8;
 
   font-family: 'Inter', system-ui, sans-serif;
 
@@ -67,11 +74,23 @@
 
 .gantt-header {
   display: flex;
-  background: var(--secondary-bg);
-  border-bottom: 1px solid var(--border-color);
+  background: linear-gradient(180deg, var(--axis-x-bg) 0%, var(--secondary-bg) 100%);
+  border-bottom: 1px solid var(--axis-divider);
 
   position: sticky;
   top: 0;
+}
+
+.gantt-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 140px;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--axis-x-accent) 0%, #0ea5e9 100%);
+  opacity: 0.45;
+  pointer-events: none;
 }
 
 .machine-column-header {
@@ -81,8 +100,9 @@
 
   padding-top: 26px;
 
-  background: var(--secondary-bg);
-  border-right: 1px solid var(--border-color);
+  background: linear-gradient(180deg, var(--axis-y-bg) 0%, #edf4ff 100%);
+  border-right: 1px solid var(--axis-divider);
+  box-shadow: inset 3px 0 0 rgba(29, 78, 216, 0.45);
 
   display: flex;
   align-items: center;
@@ -90,7 +110,7 @@
 
   font-weight: 700;
   font-size: 0.7rem;
-  color: var(--text-muted);
+  color: var(--axis-y-accent);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 
@@ -109,17 +129,19 @@
 
   margin-left: 20px;
   padding-right: 50px;
+  background: linear-gradient(180deg, rgba(191, 219, 254, 0.24) 0%, rgba(239, 246, 255, 0.16) 100%);
+  border-top: 1px solid rgba(2, 132, 199, 0.22);
 }
 
 .time-tick {
   position: absolute;
   bottom: 0;
-  border-left: 1px solid #d1dbe7;
+  border-left: 1px solid var(--axis-tick-minor);
   height: 8px;
 }
 
 .time-tick.major {
-  border-left: 1px solid #64748b;
+  border-left: 1px solid var(--axis-tick-major);
   height: 16px;
 }
 
@@ -131,15 +153,16 @@
 
   font-size: 0.62rem;
   font-weight: 700;
-  color: var(--text-main);
+  color: #075985;
 
   min-width: 50px;
   text-align: center;
 
   padding: 2px 6px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  background: #f8fcff;
+  border: 1px solid #cfe4f4;
   border-radius: 999px;
+  box-shadow: 0 4px 10px -10px rgba(2, 132, 199, 0.8);
 }
 
 
@@ -163,18 +186,20 @@
 
   padding: 16px;
 
-  background: #ffffff;
-  border-right: 1px solid var(--border-color);
+  background: linear-gradient(180deg, var(--axis-y-bg) 0%, #eef5ff 100%);
+  border-right: 1px solid var(--axis-divider);
+  box-shadow: inset 3px 0 0 rgba(29, 78, 216, 0.26);
 
   font-weight: 700;
   font-size: 0.82rem;
-  color: var(--text-main);
+  color: #1e3a8a;
 
   display: flex;
   align-items: center;
 
   position: sticky;
   left: 0;
+  z-index: 5;
 }
 
 
