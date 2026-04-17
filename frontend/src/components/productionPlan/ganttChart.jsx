@@ -170,14 +170,14 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
 
   // 9) Render
   if (processedMachines.length === 0) {
-    return <div className="no-data">Initializing Schedule...</div>;
+    return <div className="no-data">Initializing timeline view...</div>;
   }
 
   return (
     <div className="gantt-root" style={{ position: 'relative' }} >
       {/* Unit Header */}
       <div className="gantt-unit-indicator-container">
-        <span className="gantt-unit-pill">Production Time (HH:mm)</span>
+        <span className="gantt-unit-pill">Timeline Axis (HH:mm)</span>
       </div>
 
       <div style={{ display: 'flex' }}>
@@ -297,7 +297,7 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
       {hoveredNow && typeof document !== "undefined" && createPortal(
         <div className="gantt-tooltip now-validation-tooltip" style={{ left: nowTooltipPos.left, top: nowTooltipPos.top }}>
           <div className="tooltip-header" style={{ borderLeftColor: '#ef4444' }}>
-            <strong className="tooltip-title">Live Status</strong>
+            <strong className="tooltip-title">Current Time Reference</strong>
           </div>
           <div className="tooltip-body">
             <div className="tooltip-time-row"><span className="tooltip-label">CURRENT TIME</span><strong className="tooltip-value" style={{ color: '#ef4444' }}>{getLivePrecisionTime()}</strong></div>

@@ -10,16 +10,16 @@ const productionPlanHeader = ({
       <div className="production-header-shell">
         <div className="production-header-toprow">
           <div className="production-header-copy">
-            <p className="production-header-kicker">Production control center</p>
+            <p className="production-header-kicker">Production Monitoring</p>
             <div className="production-header-title-row">
-              <h2 className="production-header-title">Live production schedule</h2>
+              <h2 className="production-header-title">Live Schedule Timeline</h2>
               <p className={`production-header-live-line ${productionPlan ? "is-live" : "is-connecting"}`}>
                 <span className="production-header-live-dot" />
                 {productionPlan ? "Connected" : "Reconnecting"}
               </p>
             </div>
             <p className="production-header-subtitle">
-              Real-time sequencing, machine allocation, and execution status in one operational view.
+              Monitor sequence, machine allocation, and execution status in one timeline view.
             </p>
           </div>
 

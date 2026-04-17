@@ -169,12 +169,12 @@ const ProductionPlan = () => {
                   <span className="plan-action-icon-wrap" aria-hidden="true">
                     <GuideIcon />
                   </span>
-                  Schedule guide
+                  Timeline Guide
                 </span>
               </summary>
 
               <div className="plan-accordion-body">
-                <p className="plan-guide-intro">Use this sequence for a fast schedule review.</p>
+                <p className="plan-guide-intro">Use this sequence to review schedule flow quickly.</p>
                 <div className="plan-step-list">
                   <div className="plan-step-item">
                     <span className="plan-step-index">1</span>
@@ -182,11 +182,11 @@ const ProductionPlan = () => {
                   </div>
                   <div className="plan-step-item">
                     <span className="plan-step-index">2</span>
-                    <p className="plan-guide-text">Scan bars from left to right to verify order and overlap points.</p>
+                    <p className="plan-guide-text">Scan bars left to right to verify order and overlap points.</p>
                   </div>
                   <div className="plan-step-item">
                     <span className="plan-step-index">3</span>
-                    <p className="plan-guide-text">Compare bars against the NOW line to identify active and next operations.</p>
+                    <p className="plan-guide-text">Compare bars to the NOW line to identify active and next operations.</p>
                   </div>
                 </div>
               </div>
@@ -198,7 +198,7 @@ const ProductionPlan = () => {
                   <span className="plan-action-icon-wrap" aria-hidden="true">
                     <LegendIcon />
                   </span>
-                  Legend
+                  Status Legend
                 </span>
               </summary>
 
@@ -235,7 +235,7 @@ const ProductionPlan = () => {
                   <span className="plan-action-icon-wrap">
                     <ActionIcon />
                   </span>
-                  Actions
+                  Monitoring Actions
                 </span>
               </summary>
 
