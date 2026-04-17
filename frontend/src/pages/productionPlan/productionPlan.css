@@ -435,15 +435,15 @@
 }
 
 .plan-accordion-stack::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #122a72 0%, #1d4ed8 58%, #60a5fa 100%);
-  border-radius: 2px;
-  box-shadow: 0 0 0 1px rgba(191, 219, 254, 0.24);
+  content: none;
+}
+
+.plan-accordion-context {
+  margin: 2px 0 0 0;
+  padding: 0 2px;
+  color: #64748b;
+  font-size: 0.72rem;
+  line-height: 1.45;
 }
 
 .plan-accordion {
@@ -520,7 +520,7 @@
   border: 1px solid #dbe9f7;
   border-radius: 10px;
   background: linear-gradient(180deg, #fbfdff 0%, #ffffff 100%);
-  padding: 12px 14px;
+  padding: 0;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   overflow: hidden;
@@ -553,15 +553,20 @@
 }
 
 .plan-guide-panel > .plan-accordion-summary {
+  background: transparent;
   border-bottom: 1px solid transparent;
-  padding-bottom: 0;
+  padding: 12px 14px;
   margin-bottom: 0;
 }
 
 .plan-guide-panel[open] > .plan-accordion-summary {
   border-bottom: 1px solid var(--guide-divider, #e2e8f0);
-  padding-bottom: 10px;
+  padding-bottom: 12px;
   margin-bottom: 10px;
+}
+
+.plan-guide-panel > .plan-accordion-body {
+  padding: 0 14px 14px;
 }
 
 .plan-guide-intro {

@@ -159,6 +159,10 @@ const ProductionPlan = () => {
           </section>
 
           <div className="plan-accordion-stack">
+            <p className="plan-accordion-context">
+              Need guidance with this view? Use the sections below for schedule reading, symbol meaning, and monitoring actions.
+            </p>
+
             <details className="plan-accordion plan-guide-panel">
               <summary className="plan-accordion-summary">
                 <span className="plan-accordion-title plan-accordion-title-with-icon">
