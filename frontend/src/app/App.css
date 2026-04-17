@@ -194,16 +194,6 @@ body {
   font-weight: 500;
 }
 
-.factory-profile-name {
-  margin: 0;
-  color: #0f172a;
-  font-size: 1.1rem;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
-  overflow-wrap: anywhere;
-}
-
 .context-chip-row {
   display: flex;
   flex-wrap: wrap;
@@ -221,42 +211,6 @@ body {
   font-size: 0.72rem;
   font-weight: 700;
   padding: 0.2rem 0.5rem;
-}
-
-.context-list {
-  display: grid;
-  gap: 0.45rem;
-  margin-top: 0.6rem;
-}
-
-.context-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding-bottom: 0.35rem;
-  border-bottom: 1px dashed #dbeafe;
-}
-
-.context-item:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.context-key {
-  color: #64748b;
-  font-size: 0.74rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.context-value {
-  color: #0f172a;
-  font-size: 0.84rem;
-  font-weight: 700;
-  text-align: right;
-  overflow-wrap: anywhere;
 }
 
 .sidebar-status-pill {
@@ -521,10 +475,6 @@ body {
   box-shadow: 0 10px 24px -22px rgba(15, 23, 42, 0.62);
 }
 
-.section-full {
-  grid-column: 1 / -1;
-}
-
 /* SECTION HEADINGS */
 .section-heading {
   text-align: left; /* Modern dashboards usually align headings left */
@@ -758,10 +708,6 @@ body {
 
   .home-sections-grid {
     grid-template-columns: 1fr;
-  }
-
-  .section-full {
-    grid-column: auto;
   }
 
   .section-heading {

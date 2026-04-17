@@ -29,7 +29,7 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
   // 1) Component state and refs
   const [hoveredOp, setHoveredOp] = useState(null);
   const [hoveredNow, setHoveredNow] = useState(null);
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(0);
   const scrollContainerRef = useRef(null);
 
   // 2) Layout constants
@@ -39,8 +39,13 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
   // 3) Lifecycle timers
   useEffect(() => {
     // Keeps "now" tooltip date/time refreshed.
-    const timer = setInterval(() => setNow(Date.now()), NOW_REFRESH_INTERVAL_MS);
-    return () => clearInterval(timer);
+    const tick = () => setNow(Date.now());
+    const kickoff = setTimeout(tick, 0);
+    const timer = setInterval(tick, NOW_REFRESH_INTERVAL_MS);
+    return () => {
+      clearTimeout(kickoff);
+      clearInterval(timer);
+    };
   }, []);
 
   // 4) Data preparation
@@ -106,7 +111,7 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
     const allOps = processedMachines.flatMap(m => m.operations);
     const opsMax = allOps.length > 0 ? Math.max(...allOps.map(op => op.renderX + op.renderW)) : 0;
 
-    const currentOffset = getCurrentOffsetMinutes(snappedStartBase);
+    const currentOffset = getCurrentOffsetMinutes(snappedStartBase, now);
 
     const totalMax = Math.max(opsMax, currentOffset) + CHART_TAIL_PADDING_MIN; // Include current time
     return Math.max(totalMax, CHART_MIN_DURATION_MIN); // Minimum timeline width
@@ -114,7 +119,7 @@ export default function GanttChart({ productionPlan, isFollowMode }) {
 
   // Horizontal pixel location of the "Now" line.
   const nowLineX = useMemo(() => {
-    return getCurrentOffsetMinutes(snappedStartBase) * pixelsPerMin;
+    return getCurrentOffsetMinutes(snappedStartBase, now) * pixelsPerMin;
   }, [snappedStartBase, pixelsPerMin, now]);
 
   const orderColorMap = useMemo(() => {

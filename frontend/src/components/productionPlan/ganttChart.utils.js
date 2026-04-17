@@ -36,9 +36,9 @@ export const getOrderKey = (op) => {
  * Returns minutes elapsed between chart start and now.
  * Epoch-time math is timezone-agnostic, so no manual offset conversion is needed.
  */
-export const getCurrentOffsetMinutes = (startBase) => {
+export const getCurrentOffsetMinutes = (startBase, nowMs = Date.now()) => {
   if (!startBase) return 0;
-  return (Date.now() - startBase.getTime()) / 60000;
+  return (nowMs - startBase.getTime()) / 60000;
 };
 
 /**
