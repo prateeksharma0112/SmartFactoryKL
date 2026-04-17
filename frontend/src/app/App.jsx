@@ -2,12 +2,17 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import "./App.css";
 import Navbar from "../layout/navbar.jsx";
-import Home from "../pages/home/Home";
+import Home from "../pages/home/home";
 import ProductionPlan from "../pages/productionPlan/productionPlan";
 
 const AppLayout = () => {
   const location = useLocation();
-  const routeClass = location.pathname === "/" ? "route-home" : "route-default";
+  const routeClass =
+    location.pathname === "/"
+      ? "route-home"
+      : location.pathname === "/production-plan"
+        ? "route-production"
+        : "route-default";
 
   return (
     <>
