@@ -162,19 +162,19 @@ const Home = () => {
 
         <main className="home-main">
         <section className="home-kpi-strip" aria-label="Operational summary">
-          <article className="home-kpi-tile">
+          <article className="home-kpi-tile kpi-tone-total">
             <p className="home-kpi-label">Total Orders</p>
             <p className="home-kpi-value">{orders.total}</p>
             <p className="home-kpi-meta">Orders in current production cycle</p>
           </article>
 
-          <article className="home-kpi-tile">
+          <article className="home-kpi-tile kpi-tone-finished">
             <p className="home-kpi-label">Completion Rate</p>
             <p className="home-kpi-value">{completionRate}%</p>
             <p className="home-kpi-meta">Orders completed so far</p>
           </article>
 
-          <article className="home-kpi-tile">
+          <article className="home-kpi-tile kpi-tone-running">
             <p className="home-kpi-label">Active Load</p>
             <p className="home-kpi-value">{activeLoad}%</p>
             <p className="home-kpi-meta">Orders currently in execution</p>

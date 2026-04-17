@@ -9,24 +9,28 @@ const OperationsOverviewSection = ({ operations }) => {
           title="Total Operations"
           value={operations.total}
           description="Across all machines"
+          tone="total"
           icon=""
         />
         <Card
           title="Running"
           value={operations.running}
           description="Now in progress"
+          tone="running"
           icon=""
         />
         <Card
           title="Finished"
           value={operations.finished}
           description="Completed operations"
+          tone="finished"
           icon=""
         />
         <Card
           title="Frozen"
           value={operations.frozen}
           description="Flagged as frozen"
+          tone="frozen"
           icon=""
         />
       </div>
