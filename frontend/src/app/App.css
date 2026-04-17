@@ -122,7 +122,7 @@ body {
 
 .home-layout {
   display: grid;
-  grid-template-columns: 290px minmax(0, 1fr) 290px;
+  grid-template-columns: 240px minmax(0, 1fr) 240px;
   gap: 1rem;
   align-items: start;
 }
@@ -148,7 +148,7 @@ body {
   border: 1px solid #dbeafe;
   border-radius: 12px;
   background: #ffffff;
-  padding: 0.95rem;
+  padding: 0.85rem;
   box-shadow: 0 8px 22px -20px rgba(30, 58, 138, 0.85);
 }
 
@@ -464,6 +464,16 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .home-layout {
+    grid-template-columns: 200px minmax(0, 1fr) 200px;
+  }
+
+  .home-sidebar {
+    top: 92px;
+  }
+}
+
+@media (max-width: 920px) {
   .home-layout {
     grid-template-columns: minmax(0, 1fr);
   }
