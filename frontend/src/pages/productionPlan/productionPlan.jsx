@@ -4,6 +4,46 @@ import ProductionHeader from "./productionPlanHeader";
 import config from "../../config";
 import "./productionPlan.css";
 
+const ActionIcon = () => (
+  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="12" r="10" fill="#eff6ff" stroke="#93c5fd" strokeWidth="1.2" />
+    <circle cx="8" cy="8" r="1.4" fill="#16a34a" />
+    <circle cx="8" cy="12" r="1.4" fill="#f59e0b" />
+    <circle cx="8" cy="16" r="1.4" fill="#ef4444" />
+    <rect x="11" y="7.2" width="6" height="1.4" rx="0.7" fill="#2563eb" />
+    <rect x="11" y="11.2" width="4.8" height="1.4" rx="0.7" fill="#2563eb" />
+    <rect x="11" y="15.2" width="5.8" height="1.4" rx="0.7" fill="#2563eb" />
+  </svg>
+);
+
+const GuideIcon = () => (
+  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+    <g fill="none" stroke="#334155" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3.8 5.2h5.8c2.1 0 3.6 0.6 4.4 1.7v11.1c-0.8-1.1-2.3-1.7-4.4-1.7H3.8z" />
+      <path d="M20.2 5.2h-5.8c-2.1 0-3.6 0.6-4.4 1.7v11.1c0.8-1.1 2.3-1.7 4.4-1.7h5.8z" />
+      <circle cx="17.7" cy="7.4" r="2.3" />
+      <path d="M17.7 6.8v0.1" />
+      <path d="M17.7 8v1.2" />
+    </g>
+  </svg>
+);
+
+const LegendIcon = () => (
+  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="12" r="10" fill="#16a34a" />
+    <circle cx="12" cy="12" r="7.1" fill="#ffffff" />
+    <path
+      d="M10.15 9.75c0-1.16.95-2.1 2.12-2.1 1.17 0 2.12.94 2.12 2.1 0 .95-.62 1.62-1.36 2.02-.78.44-1.16.79-1.16 1.48v.22"
+      fill="none"
+      stroke="#16a34a"
+      strokeWidth="1.35"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <circle cx="12.1" cy="16.45" r="0.95" fill="#16a34a" />
+  </svg>
+);
+
 const ProductionPlan = () => {
   const [productionPlan, setProductionPlan] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -121,7 +161,12 @@ const ProductionPlan = () => {
           <div className="plan-accordion-stack">
             <details className="plan-accordion plan-guide-panel">
               <summary className="plan-accordion-summary">
-                <span className="plan-accordion-title">Schedule guide</span>
+                <span className="plan-accordion-title plan-accordion-title-with-icon">
+                  <span className="plan-action-icon-wrap" aria-hidden="true">
+                    <GuideIcon />
+                  </span>
+                  Schedule guide
+                </span>
               </summary>
 
               <div className="plan-accordion-body">
@@ -145,7 +190,12 @@ const ProductionPlan = () => {
 
             <details className="plan-accordion plan-guide-panel">
               <summary className="plan-accordion-summary">
-                <span className="plan-accordion-title">Legend</span>
+                <span className="plan-accordion-title plan-accordion-title-with-icon">
+                  <span className="plan-action-icon-wrap" aria-hidden="true">
+                    <LegendIcon />
+                  </span>
+                  Legend
+                </span>
               </summary>
 
               <div className="plan-accordion-body">
@@ -177,7 +227,12 @@ const ProductionPlan = () => {
 
             <details className="plan-accordion plan-guide-panel">
               <summary className="plan-accordion-summary">
-                <span className="plan-accordion-title">Actions</span>
+                <span className="plan-accordion-title plan-accordion-title-with-icon">
+                  <span className="plan-action-icon-wrap">
+                    <ActionIcon />
+                  </span>
+                  Actions
+                </span>
               </summary>
 
               <div className="plan-accordion-body">
